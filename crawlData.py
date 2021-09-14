@@ -47,6 +47,8 @@ def crawlYueGangAoIndex(originData):
     return investData
 
 class InvestData():
+    isDeprecated: bool
+
     class InvestType(tools._constBase): pass
     INVEST = InvestType()
     INVEST.TYPE_STOCK = 1
@@ -65,6 +67,7 @@ class InvestData():
         self.currentPrice = 0.0
         self.upDownPrice = 0.0
         self.upDownPercent = 0.0
+        self.isDeprecated = False
 
 class InvestDataIndex(InvestData):
     def __init__(self):
@@ -341,7 +344,7 @@ class CrawlIndexForeignPrice(CrawlPriceSina):
 class OriginData():
     def __init__(self):
         super().__init__()
-        # type, id, price
+        # type, id, price, deprecated, sell-price, sell-date
         ORIGIN_DATA_LIST = [
             [InvestData.INVEST.TYPE_STOCK, "rt_hk01810", 26.0],
             [InvestData.INVEST.TYPE_STOCK, "rt_hk03033", 8.26],
@@ -355,16 +358,17 @@ class OriginData():
             [InvestData.INVEST.TYPE_YUEGANGAO_INDEX, "粤港澳大湾区指数", 1466],
             [InvestData.INVEST.TYPE_YUEGANGAO_INDEX, "粤港澳大湾区指数", 2100],
             [InvestData.INVEST.TYPE_FUND, "f_161903", 1.8974], # 万家行业优选混合(LOF)
-            [InvestData.INVEST.TYPE_FUND, "f_110007", 1.4139],  # 易方达稳健收益债券A
+            [InvestData.INVEST.TYPE_FUND, "f_110007", 1.4159],  # 易方达稳健收益债券A
+            [InvestData.INVEST.TYPE_FUND, "f_005664", 1.6110],  # 鹏扬景欣A
             [InvestData.INVEST.TYPE_INDEX, "sh000001", 3000], # 上证指数
             [InvestData.INVEST.TYPE_INDEX, "sz399001", 14000], # 深证成指
             [InvestData.INVEST.TYPE_FOREIGN_INDEX, "int_dji", 35000], # 道琼斯
             [InvestData.INVEST.TYPE_FOREIGN_INDEX, "int_nasdaq", 14000], # NASDAQ
             [InvestData.INVEST.TYPE_FOREIGN_INDEX, "int_sp500", 4400], # SP500
+            # deprecated investment
+            [InvestData.INVEST.TYPE_FUND, "f_450009", 2.8584, True],  # 国富中小盘股票
+            [InvestData.INVEST.TYPE_FUND, "f_519736", 4.0376, True],  # 交银新成长混合
         ]
-        # deprecated investment
-        # [InvestData.INVEST.TYPE_FUND, "f_450009", 2.8584],  # 国富中小盘股票
-        # [InvestData.INVEST.TYPE_FUND, "f_519736", 4.0376],  # 交银新成长混合
 
         self.originDataList = []
         for item in ORIGIN_DATA_LIST:
@@ -384,6 +388,8 @@ class OriginData():
             originData.originType = item[0]
             originData.originId = item[1]
             originData.originPrice = item[2]
+            if (len(item) >3):
+                originData.isDeprecated = item[3]
             self.originDataList.append(originData)
 
     def getOriginDataList(self):

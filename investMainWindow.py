@@ -49,6 +49,7 @@ class InvestGrid(gridlib.Grid):
         COLOR_DARK_GREEN = wx.Colour(0, 128, 64)
         ROW_SIZE = 30
         ROW_MAX_NUMBER = 30
+        SEPARATOR_TITLES_DEPRECATED = "过时的投资"
 
     def initConst(self):
         self.COLUMN = tools._constBase()
@@ -58,6 +59,7 @@ class InvestGrid(gridlib.Grid):
         self.COLUMN.UPDOWN_PERCENT = 3
         self.COLUMN.ORIGIN_PRICE = 4
         self.COLUMN.ORIGIN_UPDOWN_PERCENT = 5
+        self.COLUMN.DEPRECTAED = 6
 
         self.Columns = dict()
         self.Columns[self.COLUMN.NAME] = "产品"
@@ -71,8 +73,8 @@ class InvestGrid(gridlib.Grid):
         self.SeparatorTitles[crawlData.InvestData.INVEST.TYPE_STOCK] = "股票列表"
         self.SeparatorTitles[crawlData.InvestData.INVEST.TYPE_YUEGANGAO_INDEX] = "粤港澳大湾区指数"
         self.SeparatorTitles[crawlData.InvestData.INVEST.TYPE_FUND] = "基金列表"
-        self.SeparatorTitles[crawlData.InvestData.INVEST.TYPE_INDEX] = "指数列表"
-        self.SeparatorTitles[crawlData.InvestData.INVEST.TYPE_FOREIGN_INDEX] = "指数列表"
+        self.SeparatorTitles[crawlData.InvestData.INVEST.TYPE_INDEX] = "国内指数列表"
+        self.SeparatorTitles[crawlData.InvestData.INVEST.TYPE_FOREIGN_INDEX] = "国外指数列表"
 
     def __init__(self, parent):
         gridlib.Grid.__init__(self, parent, -1)
@@ -118,8 +120,9 @@ class InvestGrid(gridlib.Grid):
         attr.SetFont(font)
         self.SetRowAttr(row, attr)
 
-    def checkSeparator(self, oldType, newType, row):
-        if (oldType == newType):
+    def checkSeparator(self, data, lastData, row):
+        newType = data.originType
+        if (lastData != None) and (lastData.originType == newType):
             # reset as none-separator
             span = self.GetCellSize(row, 0)
             if (span[2] > 1):
@@ -128,9 +131,16 @@ class InvestGrid(gridlib.Grid):
                     self.SetCellSize(row, i, 1, 1)
             return False
 
+        if (lastData != None) and (lastData.isDeprecated == True):
+            return False
+
         num_cols = len(self.Columns)
         self.SetCellSize(row, 0, 1, num_cols)
-        self.SetCellValue(row, 0, self.SeparatorTitles[newType])
+        if (data.isDeprecated == True):
+            self.SetCellValue(row, 0, self.Const.SEPARATOR_TITLES_DEPRECATED)
+        else:
+            self.SetCellValue(row, 0, self.SeparatorTitles[newType])
+
         self.SetCellAlignment(row, 0, wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
         self.SetCellBackgroundColour(row, 0, self.Const.COLOR_LIGHT_YELLOW)
         self.setCellFont(row, wx.BLACK, fontSize=self.Const.FONT_SIZE_SEPARATOR)
@@ -142,26 +152,15 @@ class InvestGrid(gridlib.Grid):
         gridObj = self
         class SetGridFormat():
             def __init__(self):
-                self.firstUpdate = True
                 self.toggleBackgroundColor = True
 
-            def isFirstUpdate(self):
-                return self.firstUpdate
-
             def finishUpdate(self):
-                if not self.isFirstUpdate():
-                    return False
-
                 gridObj.AutoSizeColumns(setAsMin=True)
 
                 # ignore performance; always update
-                # self.firstUpdate = False
                 self.toggleBackgroundColor = True
 
             def setFormat(self, row):
-                if not self.isFirstUpdate():
-                    return
-
                 # 设置字体格式
                 gridObj.setCellFont(row, wx.BLUE)
 
@@ -184,17 +183,35 @@ class InvestGrid(gridlib.Grid):
         return SetGridFormat()
 
     def updateInvestData(self, dataList):
-        print("updateInvestData: {0}".format(len(dataList)))
-        self.ClearGrid()
+        # move deprecated data to this list
+        deprecatedDataList = []
+        i = 0
+        while i < len(dataList):
+            data = dataList[i]
+            if data.isDeprecated == True:
+                deprecatedDataList.append(data)
+                del dataList[i]
+            else:
+                i += 1
 
-        lastType = None
-        row = 0
+        self.ClearGrid()
+        # update current data
+        row = self.updateOneDataList(dataList, 0)
+        # then update deprecated data
+        self.updateOneDataList(deprecatedDataList, row)
+
+
+    def updateOneDataList(self, dataList, startRow):
+        print("updateInvestData: {0}".format(len(dataList)))
+
+        lastData = None
+        row = startRow
         for data in dataList:
             if data == None:
                 continue
-            if (self.checkSeparator(lastType, data.originType, row)):
+            if (self.checkSeparator(data, lastData, row)):
                 row += 1
-            lastType = data.originType
+            lastData = data
 
             self.SetCellValue(row, self.COLUMN.NAME, data.name)
             self.SetCellValue(row, self.COLUMN.CURRENT_PRICE, data.currentPrice)
@@ -210,6 +227,7 @@ class InvestGrid(gridlib.Grid):
             row += 1
 
         self.setGridFormat.finishUpdate()
+        return row
 
 class MainFrame(wx.Frame):
     def addPanes(self):
