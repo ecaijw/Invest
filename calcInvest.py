@@ -48,6 +48,7 @@ class Product:
         totalBuyMoney = 0
         totalSellAmount = 0
         totalSellMoney = 0
+        averageSellPrice = 0
         for row in self.rows:
             print(row)
             price = row[COLUMNS.Price]
@@ -62,8 +63,9 @@ class Product:
         totalBuyMoney *= -1
 
         averageBuyPrice = totalBuyMoney / totalBuyAmount
-        averageSellPrice = totalSellMoney / totalSellAmount
-        self.totalProfit = totalSellAmount * (averageSellPrice - averageBuyPrice)
+        if (totalSellAmount > 0):
+            averageSellPrice = totalSellMoney / totalSellAmount
+            self.totalProfit = totalSellAmount * (averageSellPrice - averageBuyPrice)
         self.remainingPrice = self.currentPrice
         self.remainingTotalPrice = self.remainingAmount * self.remainingPrice
         self.remainingCost = averageBuyPrice
@@ -104,11 +106,13 @@ class ProductMgr:
             product.addOneRow(oneRow)
 
     def calc(self):
+        p : Product
         for p in self.productList:
-            if p.getName() == "小米":
-                p.calc()
+            p.calc()
+            # if p.getName() == "新纽":
+            #     p.calc()
 
-    def findProduct(self, name):
+    def findProduct(self, name) -> Product:
         for p in self.productList:
             if p.getName() == name:
                 return p
@@ -117,7 +121,7 @@ class ProductMgr:
 
 class excel:
     class Const:
-        FILE_NAME = r"D:\other_cjwlaptop\install\python\study\invest\file\test.xlsx"
+        FILE_NAME = r"D:\other_cjwlaptop\install\python\data\invest\test.xlsx"
         SHEET_NAME = "投资历史"
 
     def __init__(self):

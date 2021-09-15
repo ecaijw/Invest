@@ -348,7 +348,7 @@ class OriginData():
         ORIGIN_DATA_LIST = [
             [InvestData.INVEST.TYPE_STOCK, "rt_hk01810", 26.0],
             [InvestData.INVEST.TYPE_STOCK, "rt_hk03033", 8.26],
-            [InvestData.INVEST.TYPE_STOCK, "rt_hk02369", 0.50],
+            [InvestData.INVEST.TYPE_STOCK, "rt_hk02369", 0.41],
             [InvestData.INVEST.TYPE_STOCK, "rt_hk09988", 225],
             [InvestData.INVEST.TYPE_STOCK, "rt_hk00700", 523],
             [InvestData.INVEST.TYPE_STOCK, "rt_hk02096", 13.0],
@@ -359,7 +359,7 @@ class OriginData():
             [InvestData.INVEST.TYPE_YUEGANGAO_INDEX, "粤港澳大湾区指数", 2100],
             [InvestData.INVEST.TYPE_FUND, "f_161903", 1.8974], # 万家行业优选混合(LOF)
             [InvestData.INVEST.TYPE_FUND, "f_110007", 1.4159],  # 易方达稳健收益债券A
-            [InvestData.INVEST.TYPE_FUND, "f_005664", 1.6110],  # 鹏扬景欣A
+            [InvestData.INVEST.TYPE_FUND, "f_005664", 1.6115],  # 鹏扬景欣A
             [InvestData.INVEST.TYPE_INDEX, "sh000001", 3000], # 上证指数
             [InvestData.INVEST.TYPE_INDEX, "sz399001", 14000], # 深证成指
             [InvestData.INVEST.TYPE_FOREIGN_INDEX, "int_dji", 35000], # 道琼斯
