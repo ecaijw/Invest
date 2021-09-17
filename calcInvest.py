@@ -13,19 +13,21 @@ class COLUMNS(IntEnum):
     TotalRMB = 7
     ExchangeRate = 8
     Comment = 9
+    CurrentPrice = 10
 
 class Product:
     def __init__(self, oneRow):
         super().__init__()
         self.rows = []
         self.rows.append(oneRow)
+        self.productName = oneRow[COLUMNS.ProductName]
         self.remainingAmount = 0
         self.remainingTotalCost = 0
         self.remainingCost = 0
         self.remainingTotalPrice = 0
         self.remainingPrice = 0
         self.totalProfit = 0 # RMB
-        self.currentPrice = 29
+        self.currentPrice = 0
 
     def getName(self):
         return self.rows[0][COLUMNS.ProductName]
@@ -49,8 +51,10 @@ class Product:
         totalSellAmount = 0
         totalSellMoney = 0
         averageSellPrice = 0
+        exchangeRate = self.rows[0][COLUMNS.ExchangeRate]
         for row in self.rows:
-            print(row)
+            # print(row)
+            self.currentPrice = row[COLUMNS.CurrentPrice]
             price = row[COLUMNS.Price]
             if (price > 0): # sell
                 self.remainingAmount -= row[COLUMNS.Amount]
@@ -70,27 +74,31 @@ class Product:
         self.remainingTotalPrice = self.remainingAmount * self.remainingPrice
         self.remainingCost = averageBuyPrice
         self.remainingTotalCost = self.remainingAmount * self.remainingCost
-        print("剩余:\n"
-              "  数量：{0:,}；\n "
-              "  价值[{1:,}, {2:,.2f}] 成本[{3:,.2f}, {4:,.2f}]; \n"
-              "利润: \n"
-              "  剩余利润：{5:,.2f}; \n"
-              "  已卖出利润：{6:,.2f}; \n"
-              "  预计总利润：{7:,.2f}; \n"
-              "平均买入价：{8:,.2f}；平均卖出价：{9:,.2f}".format(
-            self.remainingAmount,
-            self.remainingPrice,
-            self.remainingTotalPrice,
-            self.remainingCost,
-            self.remainingTotalCost,
-
-            self.remainingTotalPrice - self.remainingTotalCost,
-            self.totalProfit,
-            (self.remainingTotalPrice - self.remainingTotalCost) + self.totalProfit,
-
-            averageBuyPrice,
-            averageSellPrice
-        ))
+        # print("剩余:\n"
+        #       "  数量：{0:,}；\n "
+        #       "  价值[{1:,}, {2:,.2f}] 成本[{3:,.2f}, {4:,.2f}]; \n"
+        #       "利润: \n"
+        #       "  剩余利润：{5:,.2f}; \n"
+        #       "  已卖出利润：{6:,.2f}; \n"
+        #       "  预计总利润：{7:,.2f}; \n"
+        #       "平均买入价：{8:,.2f}；平均卖出价：{9:,.2f}".format(
+        #     self.remainingAmount,
+        #     self.remainingPrice,
+        #     self.remainingTotalPrice,
+        #     self.remainingCost,
+        #     self.remainingTotalCost,
+        #
+        #     self.remainingTotalPrice - self.remainingTotalCost,
+        #     self.totalProfit,
+        #     (self.remainingTotalPrice - self.remainingTotalCost) + self.totalProfit,
+        #
+        #     averageBuyPrice,
+        #     averageSellPrice
+        # ))
+        if (self.remainingAmount > 0):
+            print("{0:,.2f}".format((self.remainingTotalPrice - self.remainingTotalCost) * exchangeRate))
+            # print("{0}".format(self.productName))
+            # print("{0}: 剩余利润：{1:,.2f}, 剩余股数：{2:,.2f}".format(self.productName, self.remainingTotalPrice - self.remainingTotalCost, self.remainingAmount))
 
 class ProductMgr:
     def __init__(self):
