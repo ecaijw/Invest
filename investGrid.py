@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import wx
-import wx.lib.mixins.listctrl
 import wx.grid as gridlib
 import tools
 import crawlData
@@ -170,7 +169,7 @@ class InvestGrid(gridlib.Grid):
 
 
     def updateOneDataList(self, dataList, startRow):
-        print("updateInvestData: {0}".format(len(dataList)))
+        print("updateOneDataList: {0}".format(len(dataList)))
 
         lastData = None
         row = startRow

@@ -17,6 +17,7 @@ import wx.lib.mixins.listctrl
 from queue import Queue
 import investThread
 from investGrid import InvestGrid
+from calcInvestGrid import CalcInvestGrid
 
 APP_TITLE = "Invest"
 APP_ICON = "res/invest.ico"
@@ -31,10 +32,9 @@ class MainFrame(wx.Frame):
         btnRefresh = wx.Button(self.panelLeft, -1, u'刷新', pos=(30, 150), size=(150, 50))
         btnRefresh.Bind(wx.EVT_BUTTON, self.OnRefresh)
 
-        # btnSwitch = wx.Button(self.panelLeft, -1, u'切换', pos=(30, 300), size=(100, -1))
-        # btnSwitch.Bind(wx.EVT_BUTTON, self.OnSwitch)
+        btnSwitch = wx.Button(self.panelLeft, -1, u'切换', pos=(30, 300), size=(150, 50))
+        btnSwitch.Bind(wx.EVT_BUTTON, self.OnSwitch)
 
-        text1 = wx.StaticText(self.panelRightSecond, -1, u'我是第2页', pos=(40, 100), size=(200, -1), style=wx.ALIGN_LEFT)
         text2 = wx.StaticText(self.panelBottom, -1, u'我是bottom', pos=(40, 100), size=(200, -1), style=wx.ALIGN_LEFT)
 
         self._mgr = aui.AuiManager()
@@ -98,6 +98,12 @@ class MainFrame(wx.Frame):
         self.panelRightFirst.SetSizer(box)
         self.investGrid.SetFocus()
 
+    def addCalcInvestGrid(self):
+        self.calcInvestGrid = CalcInvestGrid(self.panelRightSecond)
+        box = wx.BoxSizer(wx.VERTICAL)
+        box.Add(self.calcInvestGrid, 1, wx.EXPAND | wx.ALL, 5)
+        self.panelRightSecond.SetSizer(box)
+
     def __init__(self, parent):
         wx.Frame.__init__(self, parent, -1, APP_TITLE)
         self.SetBackgroundColour(wx.Colour(204, 223, 254))
@@ -123,6 +129,7 @@ class MainFrame(wx.Frame):
         # add panes, clock
         self.addPanes()
         self.addInvestGrid()
+        self.addCalcInvestGrid()
         self.addClock()
         self.addInvestClock()
 
@@ -149,7 +156,8 @@ class MainFrame(wx.Frame):
             print("main: notify the thread")
             self.investDataThreadEvent.set()
         if (evt.GetKeyCode() == wx.WXK_F9):
-            self.showSummaryDialog()
+            self.SwitchPane()
+            self.calcInvestGrid.updateInvestData()
         evt.Skip()
 
     def investDataThread(self, investDataQueue, event, callBack):
@@ -174,7 +182,9 @@ class MainFrame(wx.Frame):
 
     def OnSwitch(self, evt):
         '''切换信息显示窗口'''
+        self.SwitchPane()
 
+    def SwitchPane(self):
         p0 = self._mgr.GetPane('CenterPanel0')
         p1 = self._mgr.GetPane('CenterPanel1')
 
