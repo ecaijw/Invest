@@ -30,7 +30,7 @@ class CalcInvestGrid(gridlib.Grid):
             self.SetColLabelValue(col, self.Columns[col])
 
 
-    def updateInvestData(self):
+    def updateInvestData(self, dataList):
         self.ClearGrid()
         row = self.updateOneDataList()
 

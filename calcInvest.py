@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 from enum import IntEnum
+from tools import *
+
+class CalcInvestConst:
+    FILE_NAME = r"D:\other_cjwlaptop\install\python\data\invest\test.xlsx"
+    SHEET_NAME = "投资历史"
+
 
 class COLUMNS(IntEnum):
     #  ['日期', '类型', '产品', '币种', '价格', '数量', '总价', '总价（人民币）', '汇率', '说明', None, None, None, '汇率', None]
@@ -14,6 +20,25 @@ class COLUMNS(IntEnum):
     ExchangeRate = 8
     Comment = 9
     CurrentPrice = 10
+
+
+class CalcInvestData():
+    def __init__(self):
+        # print("剩余        #       "  数量：{0:,}；\n "
+        #       "  价值[{1:,}, {2:,.2f}] 成本[{3:,.2f}, {4:,.2f}]; \n"
+        #       "利润: \n"
+        #       "  剩余利润：{5:,.2f}; \n"
+        #       "  已卖出利润：{6:,.2f}; \n"
+        #       "  预计总利润：{7:,.2f}; \n"
+        #       "平均买入价：{8:,.2f}；平均卖出价：{9:,.2f}".format(
+        self.productName = ""
+        self.remainingAmount = 0
+        self.remainingTotalCost = 0
+        self.remainingCost = 0
+        self.remainingTotalPrice = 0
+        self.remainingPrice = 0
+        self.totalProfit = 0 # RMB
+        self.currentPrice = 0
 
 class Product:
     def __init__(self, oneRow):
@@ -30,7 +55,7 @@ class Product:
         self.currentPrice = 0
 
     def getName(self):
-        return self.rows[0][COLUMNS.ProductName]
+        return self.productName
 
     def addOneRow(self, oneRow):
         self.rows.append(oneRow)
@@ -42,10 +67,9 @@ class Product:
         3) 减去所有卖出成交金额，最后除以剩余股票数量
         就是剩余股票的成本价。
     '''
-    def calc(self):
-        self.remainingAmount = 0
-        self.remainingTotalPrice = 0
-        self.totalProfit = 0 # RMB
+    def calc(self) -> CalcInvestData:
+        data: CalcInvestData = CalcInvestData()
+
         totalBuyAmount = 0
         totalBuyMoney = 0
         totalSellAmount = 0
@@ -54,14 +78,14 @@ class Product:
         exchangeRate = self.rows[0][COLUMNS.ExchangeRate]
         for row in self.rows:
             # print(row)
-            self.currentPrice = row[COLUMNS.CurrentPrice]
+            data.currentPrice = row[COLUMNS.CurrentPrice]
             price = row[COLUMNS.Price]
             if (price > 0): # sell
-                self.remainingAmount -= row[COLUMNS.Amount]
+                data.remainingAmount -= row[COLUMNS.Amount]
                 totalSellAmount += row[COLUMNS.Amount]
                 totalSellMoney += row[COLUMNS.TotalPrice]
             else: # buy
-                self.remainingAmount += row[COLUMNS.Amount]
+                data.remainingAmount += row[COLUMNS.Amount]
                 totalBuyAmount += row[COLUMNS.Amount]
                 totalBuyMoney += row[COLUMNS.TotalPrice]
         totalBuyMoney *= -1
@@ -69,11 +93,11 @@ class Product:
         averageBuyPrice = totalBuyMoney / totalBuyAmount
         if (totalSellAmount > 0):
             averageSellPrice = totalSellMoney / totalSellAmount
-            self.totalProfit = totalSellAmount * (averageSellPrice - averageBuyPrice)
-        self.remainingPrice = self.currentPrice
-        self.remainingTotalPrice = self.remainingAmount * self.remainingPrice
-        self.remainingCost = averageBuyPrice
-        self.remainingTotalCost = self.remainingAmount * self.remainingCost
+            data.totalProfit = totalSellAmount * (averageSellPrice - averageBuyPrice)
+        data.remainingPrice = data.currentPrice
+        data.remainingTotalPrice = data.remainingAmount * data.remainingPrice
+        data.remainingCost = averageBuyPrice
+        data.remainingTotalCost = data.remainingAmount * data.remainingCost
         # print("剩余:\n"
         #       "  数量：{0:,}；\n "
         #       "  价值[{1:,}, {2:,.2f}] 成本[{3:,.2f}, {4:,.2f}]; \n"
@@ -95,10 +119,12 @@ class Product:
         #     averageBuyPrice,
         #     averageSellPrice
         # ))
-        if (self.remainingAmount > 0):
-            print("{0:,.2f}".format((self.remainingTotalPrice - self.remainingTotalCost) * exchangeRate))
+        if (data.remainingAmount > 0):
+            print("{0:,.2f}".format((data.remainingTotalPrice - data.remainingTotalCost) * exchangeRate))
             # print("{0}".format(self.productName))
             # print("{0}: 剩余利润：{1:,.2f}, 剩余股数：{2:,.2f}".format(self.productName, self.remainingTotalPrice - self.remainingTotalCost, self.remainingAmount))
+
+        return data
 
 class ProductMgr:
     def __init__(self):
@@ -114,11 +140,14 @@ class ProductMgr:
             product.addOneRow(oneRow)
 
     def calc(self):
+        dataList = []
         p : Product
         for p in self.productList:
-            p.calc()
+            data = p.calc()
+            dataList. append(data)
             # if p.getName() == "新纽":
-            #     p.calc()
+            #     data = p.calc()
+        return dataList
 
     def findProduct(self, name) -> Product:
         for p in self.productList:
@@ -128,20 +157,17 @@ class ProductMgr:
 
 
 class excel:
-    class Const:
-        FILE_NAME = r"D:\other_cjwlaptop\install\python\data\invest\test.xlsx"
-        SHEET_NAME = "投资历史"
 
     def __init__(self):
         super().__init__()
         self.FirstRow = []
 
-    def readExcel(self, productMgr):
+    def readExcel(self, productMgr : ProductMgr):
         import openpyxl
 
-        workbook = openpyxl.load_workbook(self.Const.FILE_NAME, data_only=True)
+        workbook = openpyxl.load_workbook(CalcInvestConst.FILE_NAME, data_only=True)
 
-        worksheet = workbook[self.Const.SHEET_NAME]
+        worksheet = workbook[CalcInvestConst.SHEET_NAME]
 
         rowNumber = 0
         for row in list(worksheet.rows):
@@ -156,19 +182,18 @@ class excel:
                 productMgr.addOneRow(oneRow)
             rowNumber += 1
 
-class calcInvest():
+class CalcInvestThreadWorker():
     def __init__(self):
         self.productMgr = ProductMgr()
 
-    def run(self):
-        print("run start")
+    def work(self):
+        print("{} work starts".format(self.__class__.__name__))
 
         excel().readExcel(self.productMgr)
+        dataList = self.productMgr.calc()
 
-        self.productMgr.calc()
-
-        print("run done")
-        pass
+        print("{} work ends".format(self.__class__.__name__))
+        return dataList
 
 if __name__ == "__main__":
-    calcInvest().run()
+    CalcInvestThreadWorker().work()

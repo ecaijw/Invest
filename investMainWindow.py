@@ -18,9 +18,47 @@ from queue import Queue
 import investThread
 from investGrid import InvestGrid
 from calcInvestGrid import CalcInvestGrid
+from calcInvest import CalcInvestThreadWorker
 
 APP_TITLE = "Invest"
 APP_ICON = "res/invest.ico"
+
+class InvestThreadBase():
+    def __init__(self, grid):
+        self.grid = grid
+        self.investDataQueue = Queue(maxsize=10)
+        self.investDataThreadEvent = threading.Event()
+
+        self.threadInvest = threading.Thread(target=self.investDataThread, args=(
+        self.investDataQueue, self.investDataThreadEvent, self.updateInvestList))
+        self.threadInvest.setDaemon(True)
+        self.threadInvest.start()
+
+    def investDataThread(self, investDataQueue, event, callBack):
+        thread = self.getThreadWorkerClass()()
+        while True:
+            event.wait()
+
+            dataList = thread.work()
+            investDataQueue.put(dataList)
+
+            event.clear() # clear the event
+
+            # notify main thread
+            wx.CallAfter(callBack)
+
+            print("thread: will wait")
+
+    def updateInvestList(self):
+        dataList = self.investDataQueue.get()
+        self.grid.updateInvestData(dataList)
+
+    def setEvent(self):
+        self.investDataThreadEvent.set()
+
+class CalcInvestThread(InvestThreadBase):
+    def getThreadWorkerClass(self):
+        return CalcInvestThreadWorker
 
 class MainFrame(wx.Frame):
     def addPanes(self):
@@ -121,7 +159,6 @@ class MainFrame(wx.Frame):
         self.investDataThreadEvent = threading.Event()
 
         # add thread
-        self.threadRunning = True
         self.threadInvest = threading.Thread(target=self.investDataThread, args=(self.investDataQueue, self.investDataThreadEvent, self.updateInvestList))
         self.threadInvest.setDaemon(True)
         self.threadInvest.start()
@@ -132,6 +169,9 @@ class MainFrame(wx.Frame):
         self.addCalcInvestGrid()
         self.addClock()
         self.addInvestClock()
+
+        # init CalcInvestThread
+        self.calcInvestThread = CalcInvestThread(self.calcInvestGrid)
 
         # bind key-down event
         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
@@ -157,12 +197,12 @@ class MainFrame(wx.Frame):
             self.investDataThreadEvent.set()
         if (evt.GetKeyCode() == wx.WXK_F9):
             self.SwitchPane()
-            self.calcInvestGrid.updateInvestData()
+            self.calcInvestThread.setEvent()
         evt.Skip()
 
     def investDataThread(self, investDataQueue, event, callBack):
         thread = investThread.investThread()
-        while self.threadRunning:
+        while True:
             event.wait()
 
             dataList = thread.work()
