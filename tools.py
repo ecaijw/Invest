@@ -1,5 +1,6 @@
+import os
 import sys
-
+import json
 
 class _constBase:
     class ConstError(TypeError): pass
@@ -9,8 +10,14 @@ class _constBase:
             raise self.ConstError("Can't rebind const (%s)" % name)
         self.__dict__[name] = value
 
-
 class GlobalConst:
+    FILE_NAME_ORIGIN_DATA_JSON = r"..\data\invest\OriginData.json"
+
+    @staticmethod
+    def currentDirFileName(fileName):
+        currentDir = os.path.dirname(os.path.realpath(__file__))
+        return currentDir + '\\' + fileName
+
     # FCN, 股票, 指数, 公募基金, 私募基金, 私募股权, 债券, 借款, 固收类, 其它
     CALC_INVEST_TYPE_FCN = 1
     CALC_INVEST_TYPE_STOCK = 2
@@ -35,18 +42,45 @@ class GlobalConst:
         CALC_INVEST_TYPE_OTHER : "其它",
     }
 
-class tools:
+class GlobalTools:
     @staticmethod
     def convertExchangeRate():
         # =VLOOKUP(D2, M2: N5, 2, 0)
         for i in range(2, 300):
             print("=VLOOKUP(D{0}, M2: N5, 2, 0)".format(i))
 
+class JsonTools:
+    @staticmethod
+    def dictGetDataByKey(dictData, key):
+        if JsonTools.hasKey(dictData, key):
+            return dictData[key]
+        return None
+
+    @staticmethod
+    def hasKey(dictData, key):
+        for k in dictData:
+            if k == key:
+                return True
+        return False
+
+    @staticmethod
+    def writeJson(filename, jsonData, mode = "w"):
+        print("Writing Json:" + filename)
+
+        with open(filename, mode,  encoding = 'utf-8') as file_obj:
+            json.dump(jsonData, file_obj, ensure_ascii=False)
+        print("Finish Writing!")
+
+    @staticmethod
+    def readAsJson(filename):
+        with open(filename, 'r',  encoding = 'utf-8') as file_obj:
+            jsonData = json.load(file_obj)
+        return jsonData
 
 
 if __name__ == "__main__":
     if (len(sys.argv) > 1):
         print('sys.argv: ' + sys.argv[1])
         if (sys.argv[1] == 'rate'):
-            tools.convertExchangeRate()
+            GlobalTools.convertExchangeRate()
 

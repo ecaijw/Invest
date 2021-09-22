@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 import re
 
 import tools
+from tools import *
 
 
 def crawlYueGangAoIndex(originData):
@@ -342,55 +343,107 @@ class CrawlIndexForeignPrice(CrawlPriceSina):
         return investData
 
 class OriginData():
+    # type, id, price, deprecated, sell-price, sell-date
+    DATA_TYPE = "类型"
+    DATA_ID = "id"
+    DATA_ORIGIN_PRICE = "原始价格"
+    DATA_DEPRECATED = "过时的投资"
+
+    ORIGIN_DATA_LIST = [
+        [InvestData.INVEST.TYPE_STOCK, "rt_hk01810", 26.0],
+        [InvestData.INVEST.TYPE_STOCK, "rt_hk03033", 8.26],
+        [InvestData.INVEST.TYPE_STOCK, "rt_hk02369", 0.41],
+        [InvestData.INVEST.TYPE_STOCK, "rt_hk09988", 225],
+        [InvestData.INVEST.TYPE_STOCK, "rt_hk00700", 523],
+        [InvestData.INVEST.TYPE_STOCK, "rt_hk02096", 13.0],
+        [InvestData.INVEST.TYPE_STOCK, "gb_bili", 110.0],
+        [InvestData.INVEST.TYPE_STOCK, "gb_tigr", 19.5],
+        [InvestData.INVEST.TYPE_YUEGANGAO_INDEX, "粤港澳大湾区指数", 2300],
+        [InvestData.INVEST.TYPE_YUEGANGAO_INDEX, "粤港澳大湾区指数", 1466],
+        [InvestData.INVEST.TYPE_YUEGANGAO_INDEX, "粤港澳大湾区指数", 2100],
+        [InvestData.INVEST.TYPE_FUND, "f_161903", 1.8974],  # 万家行业优选混合(LOF)
+        [InvestData.INVEST.TYPE_FUND, "f_110007", 1.4159],  # 易方达稳健收益债券A
+        [InvestData.INVEST.TYPE_FUND, "f_005664", 1.6115],  # 鹏扬景欣A
+        [InvestData.INVEST.TYPE_INDEX, "sh000001", 3000],  # 上证指数
+        [InvestData.INVEST.TYPE_INDEX, "sz399001", 14000],  # 深证成指
+        [InvestData.INVEST.TYPE_FOREIGN_INDEX, "int_dji", 35000],  # 道琼斯
+        [InvestData.INVEST.TYPE_FOREIGN_INDEX, "int_nasdaq", 14000],  # NASDAQ
+        [InvestData.INVEST.TYPE_FOREIGN_INDEX, "int_sp500", 4400],  # SP500
+        # deprecated investment
+        [InvestData.INVEST.TYPE_FUND, "f_450009", 2.8584, True],  # 国富中小盘股票
+        [InvestData.INVEST.TYPE_FUND, "f_519736", 4.0376, True],  # 交银新成长混合
+    ]
+
     def __init__(self):
         super().__init__()
-        # type, id, price, deprecated, sell-price, sell-date
-        ORIGIN_DATA_LIST = [
-            [InvestData.INVEST.TYPE_STOCK, "rt_hk01810", 26.0],
-            [InvestData.INVEST.TYPE_STOCK, "rt_hk03033", 8.26],
-            [InvestData.INVEST.TYPE_STOCK, "rt_hk02369", 0.41],
-            [InvestData.INVEST.TYPE_STOCK, "rt_hk09988", 225],
-            [InvestData.INVEST.TYPE_STOCK, "rt_hk00700", 523],
-            [InvestData.INVEST.TYPE_STOCK, "rt_hk02096", 13.0],
-            [InvestData.INVEST.TYPE_STOCK, "gb_bili", 110.0],
-            [InvestData.INVEST.TYPE_STOCK, "gb_tigr", 19.5],
-            [InvestData.INVEST.TYPE_YUEGANGAO_INDEX, "粤港澳大湾区指数", 2300],
-            [InvestData.INVEST.TYPE_YUEGANGAO_INDEX, "粤港澳大湾区指数", 1466],
-            [InvestData.INVEST.TYPE_YUEGANGAO_INDEX, "粤港澳大湾区指数", 2100],
-            [InvestData.INVEST.TYPE_FUND, "f_161903", 1.8974], # 万家行业优选混合(LOF)
-            [InvestData.INVEST.TYPE_FUND, "f_110007", 1.4159],  # 易方达稳健收益债券A
-            [InvestData.INVEST.TYPE_FUND, "f_005664", 1.6115],  # 鹏扬景欣A
-            [InvestData.INVEST.TYPE_INDEX, "sh000001", 3000], # 上证指数
-            [InvestData.INVEST.TYPE_INDEX, "sz399001", 14000], # 深证成指
-            [InvestData.INVEST.TYPE_FOREIGN_INDEX, "int_dji", 35000], # 道琼斯
-            [InvestData.INVEST.TYPE_FOREIGN_INDEX, "int_nasdaq", 14000], # NASDAQ
-            [InvestData.INVEST.TYPE_FOREIGN_INDEX, "int_sp500", 4400], # SP500
-            # deprecated investment
-            [InvestData.INVEST.TYPE_FUND, "f_450009", 2.8584, True],  # 国富中小盘股票
-            [InvestData.INVEST.TYPE_FUND, "f_519736", 4.0376, True],  # 交银新成长混合
-        ]
+        self.originDataList = self.LoadOriginData()
 
-        self.originDataList = []
-        for item in ORIGIN_DATA_LIST:
+    def LoadOriginData(self):
+        jsonDataList = JsonTools.readAsJson(GlobalConst.currentDirFileName(GlobalConst.FILE_NAME_ORIGIN_DATA_JSON))
+        originDataList = []
+        for item in jsonDataList:
             originData = None
-            if item[0] == InvestData.INVEST.TYPE_STOCK:
+            dataType = item[OriginData.DATA_TYPE]
+            if dataType == InvestData.INVEST.TYPE_STOCK:
                 originData = InvestDataStock()
-            elif item[0] == InvestData.INVEST.TYPE_YUEGANGAO_INDEX:
+            elif dataType == InvestData.INVEST.TYPE_YUEGANGAO_INDEX:
                 originData = InvestDataIndex()
-            elif item[0] == InvestData.INVEST.TYPE_FUND:
+            elif dataType == InvestData.INVEST.TYPE_FUND:
                 originData = InvestDataFund()
-            elif item[0] == InvestData.INVEST.TYPE_INDEX:
+            elif dataType == InvestData.INVEST.TYPE_INDEX:
                 originData = InvestDataIndex()
-            elif item[0] == InvestData.INVEST.TYPE_FOREIGN_INDEX:
+            elif dataType == InvestData.INVEST.TYPE_FOREIGN_INDEX:
                 originData = InvestForeignDataIndex()
             else:
                 assert(False)
-            originData.originType = item[0]
-            originData.originId = item[1]
-            originData.originPrice = item[2]
-            if (len(item) >3):
-                originData.isDeprecated = item[3]
-            self.originDataList.append(originData)
+            originData.originType = dataType
+            originData.originId = item[OriginData.DATA_ID]
+            originData.originPrice = item[OriginData.DATA_ORIGIN_PRICE]
+            originData.isDeprecated = (item[OriginData.DATA_DEPRECATED] == 'True')
+            originDataList.append(originData)
+        return originDataList
+
+    def HelperLoadOriginData(self):
+        originDataList = []
+        for data in self.ORIGIN_DATA_LIST:
+            originData = None
+            if data[0] == InvestData.INVEST.TYPE_STOCK:
+                originData = InvestDataStock()
+            elif data[0] == InvestData.INVEST.TYPE_YUEGANGAO_INDEX:
+                originData = InvestDataIndex()
+            elif data[0] == InvestData.INVEST.TYPE_FUND:
+                originData = InvestDataFund()
+            elif data[0] == InvestData.INVEST.TYPE_INDEX:
+                originData = InvestDataIndex()
+            elif data[0] == InvestData.INVEST.TYPE_FOREIGN_INDEX:
+                originData = InvestForeignDataIndex()
+            else:
+                assert (False)
+            originData.originType = data[0]
+            originData.originId = data[1]
+            originData.originPrice = data[2]
+            if (len(data) > 3):
+                originData.isDeprecated = data[3]
+            originDataList.append(originData)
+        return originDataList
+
+    # helper function to write json
+    def HelperWriteJson(self):
+        jsonData = []
+        for data in self.ORIGIN_DATA_LIST:
+            # type, id, price, deprecated, sell-price, sell-date
+            oneData = dict()
+            oneData[OriginData.DATA_TYPE] = data[0]
+            oneData[OriginData.DATA_ID] = data[1]
+            oneData[OriginData.DATA_ORIGIN_PRICE] = data[2]
+
+            isDeprecated = False
+            if (len(data) > 3):
+                isDeprecated = data[3]
+            oneData[OriginData.DATA_DEPRECATED] = str(isDeprecated)
+
+            jsonData.append(oneData)
+        JsonTools.writeJson(GlobalConst.currentDirFileName(GlobalConst.FILE_NAME_ORIGIN_DATA_JSON), jsonData)
 
     def getOriginDataList(self):
         return self.originDataList
@@ -406,3 +459,6 @@ class OriginData():
             if item.originId == id:
                 return item
         return None
+
+if __name__ == "__main__":
+    OriginData().HelperWriteJson()
