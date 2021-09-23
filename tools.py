@@ -1,5 +1,4 @@
 import os
-import sys
 import json
 
 class _constBase:
@@ -11,6 +10,7 @@ class _constBase:
         self.__dict__[name] = value
 
 class GlobalConst:
+    FILE_NAME_ORIGIN_DATA_HELPER_JSON = r"..\data\invest\OriginDataHelper.json"
     FILE_NAME_ORIGIN_DATA_JSON = r"..\data\invest\OriginData.json"
 
     @staticmethod
@@ -76,11 +76,3 @@ class JsonTools:
         with open(filename, 'r',  encoding = 'utf-8') as file_obj:
             jsonData = json.load(file_obj)
         return jsonData
-
-
-if __name__ == "__main__":
-    if (len(sys.argv) > 1):
-        print('sys.argv: ' + sys.argv[1])
-        if (sys.argv[1] == 'rate'):
-            GlobalTools.convertExchangeRate()
-

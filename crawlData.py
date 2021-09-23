@@ -349,31 +349,6 @@ class OriginData():
     DATA_ORIGIN_PRICE = "原始价格"
     DATA_DEPRECATED = "过时的投资"
 
-    ORIGIN_DATA_LIST = [
-        [InvestData.INVEST.TYPE_STOCK, "rt_hk01810", 26.0],
-        [InvestData.INVEST.TYPE_STOCK, "rt_hk03033", 8.26],
-        [InvestData.INVEST.TYPE_STOCK, "rt_hk02369", 0.41],
-        [InvestData.INVEST.TYPE_STOCK, "rt_hk09988", 225],
-        [InvestData.INVEST.TYPE_STOCK, "rt_hk00700", 523],
-        [InvestData.INVEST.TYPE_STOCK, "rt_hk02096", 13.0],
-        [InvestData.INVEST.TYPE_STOCK, "gb_bili", 110.0],
-        [InvestData.INVEST.TYPE_STOCK, "gb_tigr", 19.5],
-        [InvestData.INVEST.TYPE_YUEGANGAO_INDEX, "粤港澳大湾区指数", 2300],
-        [InvestData.INVEST.TYPE_YUEGANGAO_INDEX, "粤港澳大湾区指数", 1466],
-        [InvestData.INVEST.TYPE_YUEGANGAO_INDEX, "粤港澳大湾区指数", 2100],
-        [InvestData.INVEST.TYPE_FUND, "f_161903", 1.8974],  # 万家行业优选混合(LOF)
-        [InvestData.INVEST.TYPE_FUND, "f_110007", 1.4159],  # 易方达稳健收益债券A
-        [InvestData.INVEST.TYPE_FUND, "f_005664", 1.6115],  # 鹏扬景欣A
-        [InvestData.INVEST.TYPE_INDEX, "sh000001", 3000],  # 上证指数
-        [InvestData.INVEST.TYPE_INDEX, "sz399001", 14000],  # 深证成指
-        [InvestData.INVEST.TYPE_FOREIGN_INDEX, "int_dji", 35000],  # 道琼斯
-        [InvestData.INVEST.TYPE_FOREIGN_INDEX, "int_nasdaq", 14000],  # NASDAQ
-        [InvestData.INVEST.TYPE_FOREIGN_INDEX, "int_sp500", 4400],  # SP500
-        # deprecated investment
-        [InvestData.INVEST.TYPE_FUND, "f_450009", 2.8584, True],  # 国富中小盘股票
-        [InvestData.INVEST.TYPE_FUND, "f_519736", 4.0376, True],  # 交银新成长混合
-    ]
-
     def __init__(self):
         super().__init__()
         self.originDataList = self.LoadOriginData()
@@ -402,6 +377,47 @@ class OriginData():
             originData.isDeprecated = (item[OriginData.DATA_DEPRECATED] == 'True')
             originDataList.append(originData)
         return originDataList
+
+    def getOriginDataList(self):
+        return self.originDataList
+
+    def findItemByType(self, type):
+        for item in self.originDataList:
+            if item.originType == type:
+                return item
+        return None
+
+    def findItemById(self, id):
+        for item in self.originDataList:
+            if item.originId == id:
+                return item
+        return None
+
+class OriginDataHelper():
+    ORIGIN_DATA_LIST = [
+        [InvestData.INVEST.TYPE_STOCK, "rt_hk01810", 26.0],
+        [InvestData.INVEST.TYPE_STOCK, "rt_hk03033", 8.26],
+        [InvestData.INVEST.TYPE_STOCK, "rt_hk02369", 0.41],
+        [InvestData.INVEST.TYPE_STOCK, "rt_hk09988", 225],
+        [InvestData.INVEST.TYPE_STOCK, "rt_hk00700", 523],
+        [InvestData.INVEST.TYPE_STOCK, "rt_hk02096", 13.0],
+        [InvestData.INVEST.TYPE_STOCK, "gb_bili", 110.0],
+        [InvestData.INVEST.TYPE_STOCK, "gb_tigr", 19.5],
+        [InvestData.INVEST.TYPE_YUEGANGAO_INDEX, "粤港澳大湾区指数", 2300],
+        [InvestData.INVEST.TYPE_YUEGANGAO_INDEX, "粤港澳大湾区指数", 1466],
+        [InvestData.INVEST.TYPE_YUEGANGAO_INDEX, "粤港澳大湾区指数", 2100],
+        [InvestData.INVEST.TYPE_FUND, "f_161903", 1.8974],  # 万家行业优选混合(LOF)
+        [InvestData.INVEST.TYPE_FUND, "f_110007", 1.4159],  # 易方达稳健收益债券A
+        [InvestData.INVEST.TYPE_FUND, "f_005664", 1.6115],  # 鹏扬景欣A
+        [InvestData.INVEST.TYPE_INDEX, "sh000001", 3000],  # 上证指数
+        [InvestData.INVEST.TYPE_INDEX, "sz399001", 14000],  # 深证成指
+        [InvestData.INVEST.TYPE_FOREIGN_INDEX, "int_dji", 35000],  # 道琼斯
+        [InvestData.INVEST.TYPE_FOREIGN_INDEX, "int_nasdaq", 14000],  # NASDAQ
+        [InvestData.INVEST.TYPE_FOREIGN_INDEX, "int_sp500", 4400],  # SP500
+        # deprecated investment
+        [InvestData.INVEST.TYPE_FUND, "f_450009", 2.8584, True],  # 国富中小盘股票
+        [InvestData.INVEST.TYPE_FUND, "f_519736", 4.0376, True],  # 交银新成长混合
+    ]
 
     def HelperLoadOriginData(self):
         originDataList = []
@@ -443,22 +459,4 @@ class OriginData():
             oneData[OriginData.DATA_DEPRECATED] = str(isDeprecated)
 
             jsonData.append(oneData)
-        JsonTools.writeJson(GlobalConst.currentDirFileName(GlobalConst.FILE_NAME_ORIGIN_DATA_JSON), jsonData)
-
-    def getOriginDataList(self):
-        return self.originDataList
-
-    def findItemByType(self, type):
-        for item in self.originDataList:
-            if item.originType == type:
-                return item
-        return None
-
-    def findItemById(self, id):
-        for item in self.originDataList:
-            if item.originId == id:
-                return item
-        return None
-
-if __name__ == "__main__":
-    OriginData().HelperWriteJson()
+        JsonTools.writeJson(GlobalConst.currentDirFileName(GlobalConst.FILE_NAME_ORIGIN_DATA_HELPER_JSON), jsonData)

@@ -194,6 +194,3 @@ class CalcInvestThreadWorker():
 
         print("{} work ends".format(self.__class__.__name__))
         return dataList
-
-if __name__ == "__main__":
-    CalcInvestThreadWorker().work()
