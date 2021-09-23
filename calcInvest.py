@@ -69,6 +69,7 @@ class Product:
     '''
     def calc(self) -> CalcInvestData:
         data: CalcInvestData = CalcInvestData()
+        data.productName = self.productName
 
         totalBuyAmount = 0
         totalBuyMoney = 0

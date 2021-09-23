@@ -1,22 +1,15 @@
 # -*- coding: utf-8 -*-
 
 import wx
-import wx.grid as gridlib
 import tools
 import crawlData
+from investGridBase import InvestGridBase
 
-class InvestGrid(gridlib.Grid):
-    class Const:
-        UPDOWN_FIELD_WIDTH = 2
-        FONT_SIZE_SEPARATOR = 12
-        FONT_SIZE_CONTENT = 14
-        FONT_NAME = "微软雅黑"
-        COLOR_LIGHT_YELLOW = wx.Colour(255, 255, 180)
-        COLOR_BACKGROUND_LIGHT_GRAY = wx.Colour(245, 245, 245)
-        COLOR_DARK_GREEN = wx.Colour(0, 128, 64)
-        ROW_SIZE = 30
-        ROW_MAX_NUMBER = 30
-        SEPARATOR_TITLES_DEPRECATED = "过时的投资"
+class InvestGrid(InvestGridBase):
+    UPDOWN_FIELD_WIDTH = 2
+    ROW_SIZE = 30
+    ROW_MAX_NUMBER = 30
+    SEPARATOR_TITLES_DEPRECATED = "过时的投资"
 
     def initConst(self):
         self.COLUMN = tools._constBase()
@@ -44,48 +37,16 @@ class InvestGrid(gridlib.Grid):
         self.SeparatorTitles[crawlData.InvestData.INVEST.TYPE_FOREIGN_INDEX] = "国外指数列表"
 
     def __init__(self, parent):
-        gridlib.Grid.__init__(self, parent, -1)
+        InvestGridBase.__init__(self, parent)
         self.initConst()
 
-        self.CreateGrid(self.Const.ROW_MAX_NUMBER, len(self.Columns))
-        self.EnableEditing(False)
+        self.CreateGrid(self.ROW_MAX_NUMBER, len(self.Columns))
         self.setGridFormat = self.createSetGridFormat()
 
         for row in range(self.GetNumberRows()):
-            self.SetRowSize(row, self.Const.ROW_SIZE)
+            self.SetRowSize(row, self.ROW_SIZE)
         for col in range(len(self.Columns)):
             self.SetColLabelValue(col, self.Columns[col])
-
-    def GetColorByUpDown(self, number):
-        if (number > 0.0):
-            return self.Const.COLOR_DARK_GREEN
-        return wx.RED
-
-    def SetCellNumberAndColor(self, row, col, argNumber, fieldWidth = -1):
-        textNumber = ''
-        floatNumber = 0.0
-        if (type(argNumber) is str):
-            textNumber = argNumber
-            if (argNumber.find('%') != -1):
-                argNumber = argNumber.strip('%')
-            floatNumber = float(argNumber)
-        else:
-            textNumber = str(argNumber)
-            floatNumber = argNumber
-
-        if (fieldWidth != -1): # set field with
-            textNumber = "{0:.{1}f}".format(floatNumber, fieldWidth)
-
-        self.SetCellValue(row, col, textNumber)
-        self.SetCellTextColour(row, col, self.GetColorByUpDown(floatNumber))
-
-    def setCellFont(self, row, fontColor = wx.BLACK, fontSize = Const.FONT_SIZE_CONTENT, fontName = Const.FONT_NAME):
-        # 设置字体格式
-        attr = wx.grid.GridCellAttr()
-        attr.SetTextColour(fontColor)
-        font = wx.Font(fontSize, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, fontName)
-        attr.SetFont(font)
-        self.SetRowAttr(row, attr)
 
     def checkSeparator(self, data, lastData, row):
         newType = data.originType
@@ -104,13 +65,13 @@ class InvestGrid(gridlib.Grid):
         num_cols = len(self.Columns)
         self.SetCellSize(row, 0, 1, num_cols)
         if (data.isDeprecated == True):
-            self.SetCellValue(row, 0, self.Const.SEPARATOR_TITLES_DEPRECATED)
+            self.SetCellValue(row, 0, self.SEPARATOR_TITLES_DEPRECATED)
         else:
             self.SetCellValue(row, 0, self.SeparatorTitles[newType])
 
         self.SetCellAlignment(row, 0, wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
-        self.SetCellBackgroundColour(row, 0, self.Const.COLOR_LIGHT_YELLOW)
-        self.setCellFont(row, wx.BLACK, fontSize=self.Const.FONT_SIZE_SEPARATOR)
+        self.SetCellBackgroundColour(row, 0, self.COLOR_LIGHT_YELLOW)
+        self.setCellFont(row, wx.BLACK, fontSize=self.FONT_SIZE_SEPARATOR)
 
         return True
 
@@ -139,7 +100,7 @@ class InvestGrid(gridlib.Grid):
 
                 backgroundColor = gridObj.GetDefaultCellBackgroundColour()
                 if self.toggleBackgroundColor:
-                    backgroundColor = gridObj.Const.COLOR_BACKGROUND_LIGHT_GRAY
+                    backgroundColor = gridObj.COLOR_BACKGROUND_LIGHT_GRAY
                 self.toggleBackgroundColor = not self.toggleBackgroundColor # toggle the background color
 
                 for col in range(len(gridObj.Columns)):
@@ -182,7 +143,7 @@ class InvestGrid(gridlib.Grid):
 
             self.SetCellValue(row, self.COLUMN.NAME, data.name)
             self.SetCellValue(row, self.COLUMN.CURRENT_PRICE, data.currentPrice)
-            self.SetCellNumberAndColor(row, self.COLUMN.UPDOWN_PRICE, data.upDownPrice, fieldWidth = self.Const.UPDOWN_FIELD_WIDTH)
+            self.SetCellNumberAndColor(row, self.COLUMN.UPDOWN_PRICE, data.upDownPrice, fieldWidth = self.UPDOWN_FIELD_WIDTH)
             self.SetCellNumberAndColor(row, self.COLUMN.UPDOWN_PERCENT, data.upDownPercent)
             self.SetCellValue(row, self.COLUMN.ORIGIN_PRICE, str(data.originPrice))
 
