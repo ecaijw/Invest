@@ -113,7 +113,7 @@ class InvestGrid(InvestGridBase):
             self.SetCellValue(row, self.COLUMN.ORIGIN_PRICE, str(data.originPrice))
 
             originPercent = (float(data.currentPrice) - float(data.originPrice)) / float(data.originPrice) * 100.0
-            self.SetCellNumberAndColor(row, self.COLUMN.ORIGIN_UPDOWN_PERCENT, originPercent)
+            self.SetCellNumberAndColor(row, self.COLUMN.ORIGIN_UPDOWN_PERCENT, "{:.2f}%".format(originPercent))
 
             self.setGridFormat.setFormat(row)
 

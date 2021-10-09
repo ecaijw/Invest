@@ -34,12 +34,11 @@ class InvestGridBase(gridlib.Grid):
                 argNumber = argNumber.strip('%')
             floatNumber = float(argNumber)
         else:
-            textNumber = str(argNumber)
             floatNumber = argNumber
 
-        if (fieldWidth == -1): # set field with
-            fieldWidth = self.FLOAT_FIELD_WIDTH
-        textNumber = "{0:.{1}f}".format(floatNumber, fieldWidth)
+            if (fieldWidth == -1): # set field with
+                fieldWidth = self.FLOAT_FIELD_WIDTH
+            textNumber = "{0:.{1}f}".format(floatNumber, fieldWidth)
 
         self.SetCellValue(row, col, textNumber)
         self.SetCellTextColour(row, col, self.GetColorByUpDown(floatNumber))
