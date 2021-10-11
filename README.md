@@ -1,5 +1,5 @@
 # Invest
-### This project is to show investment data. It auto refreshes the data every 10 secondes
+### This project is to show investment data. It auto refreshes the data every 10 seconds
 
 ### How to use
 
