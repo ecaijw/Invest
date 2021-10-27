@@ -6,55 +6,21 @@ curPath = os.path.abspath(os.path.dirname(__file__))
 rootPath = os.path.split(curPath)[0]
 sys.path.append(rootPath)
 
-import threading
 import time
+from InvestThreadBase import InvestThreadBase
 
 import wx
 import win32api
 import sys
 import wx.lib.agw.aui as aui
 import wx.lib.mixins.listctrl
-from queue import Queue
-import investThread
+from investThread import InvestThread
 from investGrid import InvestGrid
 from calcInvestGrid import CalcInvestGrid
 from calcInvest import CalcInvestThreadWorker
 
 APP_TITLE = "Invest"
 APP_ICON = "res/invest.ico"
-
-class InvestThreadBase():
-    def __init__(self, grid):
-        self.grid = grid
-        self.investDataQueue = Queue(maxsize=10)
-        self.investDataThreadEvent = threading.Event()
-
-        self.threadInvest = threading.Thread(target=self.investDataThread, args=(
-        self.investDataQueue, self.investDataThreadEvent, self.updateInvestList))
-        self.threadInvest.setDaemon(True)
-        self.threadInvest.start()
-
-    def investDataThread(self, investDataQueue, event, callBack):
-        thread = self.getThreadWorkerClass()()
-        while True:
-            event.wait()
-
-            dataList = thread.work()
-            investDataQueue.put(dataList)
-
-            event.clear() # clear the event
-
-            # notify main thread
-            wx.CallAfter(callBack)
-
-            print("thread: will wait")
-
-    def updateInvestList(self):
-        dataList = self.investDataQueue.get()
-        self.grid.updateInvestData(dataList)
-
-    def setEvent(self):
-        self.investDataThreadEvent.set()
 
 class CalcInvestThread(InvestThreadBase):
     def getThreadWorkerClass(self):
@@ -95,7 +61,7 @@ class MainFrame(wx.Frame):
         self.clockInvest.SetLabel('%02d:%02d:%02d' % (t.tm_hour, t.tm_min, t.tm_sec))
 
     def OnInvestTimer(self, evt):
-        self.investDataThreadEvent.set()
+        self.investThread.setEvent()
 
     def addInvestClock(self):
 
@@ -155,20 +121,15 @@ class MainFrame(wx.Frame):
             icon = wx.Icon(APP_ICON, wx.BITMAP_TYPE_ICO)
         self.SetIcon(icon)
 
-        self.investDataQueue = Queue(maxsize=10)
-        self.investDataThreadEvent = threading.Event()
-
-        # add thread
-        self.threadInvest = threading.Thread(target=self.investDataThread, args=(self.investDataQueue, self.investDataThreadEvent, self.updateInvestList))
-        self.threadInvest.setDaemon(True)
-        self.threadInvest.start()
-
         # add panes, clock
         self.addPanes()
         self.addInvestGrid()
         self.addCalcInvestGrid()
         self.addClock()
         self.addInvestClock()
+
+        # add thread
+        self.investThread = InvestThread(self.investGrid, self)
 
         # init CalcInvestThread
         self.calcInvestThread = CalcInvestThread(self.calcInvestGrid)
@@ -183,43 +144,24 @@ class MainFrame(wx.Frame):
         # last: trigger the timer
         self.OnInvestTimer(wx.EVT_TIMER)
 
-    def updateInvestList(self):
+    def afterUpdateInvestList(self):
         self.updateInvestClock()
-        dataList = self.investDataQueue.get()
-        print("main: {0}: get data".format(len(dataList)))
-        self.investGrid.updateInvestData(dataList)
 
     def OnKeyDown(self, evt):
         keyCode = evt.GetKeyCode()
         # print(keyCode)
         if (evt.GetKeyCode() == wx.WXK_F5):
             print("main: notify the thread")
-            self.investDataThreadEvent.set()
+            self.investThread.setEvent()
         if (evt.GetKeyCode() == wx.WXK_F9):
             self.SwitchPane()
             self.calcInvestThread.setEvent()
         evt.Skip()
 
-    def investDataThread(self, investDataQueue, event, callBack):
-        thread = investThread.investThread()
-        while True:
-            event.wait()
-
-            dataList = thread.work()
-            if (len(dataList) > 0):
-                investDataQueue.put(dataList)
-
-            event.clear() # clear the event
-
-            # notify main thread
-            wx.CallAfter(callBack)
-
-            print("thread: will wait")
-
     def OnRefresh(self, evt):
         # refresh the data
         print("main: notify the thread")
-        self.investDataThreadEvent.set()
+        self.investThread.setEvent()
 
     def OnSwitch(self, evt):
         '''切换信息显示窗口'''

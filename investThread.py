@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 import crawlData
 from crawlData import InvestData
+from InvestThreadBase import InvestThreadBase
 
-class investThread():
+class InvestThread(InvestThreadBase):
+    def getThreadWorkerClass(self):
+        return InvestThreadWorker
+
+class InvestThreadWorker():
     def __init__(self):
         self.originData = crawlData.OriginData()
         self.crawlStockPrice = crawlData.CrawlStockPrice()
