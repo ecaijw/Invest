@@ -206,7 +206,8 @@ class MainFrame(wx.Frame):
             event.wait()
 
             dataList = thread.work()
-            investDataQueue.put(dataList)
+            if (len(dataList) > 0):
+                investDataQueue.put(dataList)
 
             event.clear() # clear the event
 

@@ -120,7 +120,9 @@ class CrawlPriceSina():
             if len(item) == 0:
                 continue
             investData = self.crawlOnePrice(item, originData)
-            dataList.append(investData)
+            if (investData != None):
+                # note: investData may be None in case of error , e.g. network error
+                dataList.append(investData)
 
         print("done: read")
         return dataList
