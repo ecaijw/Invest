@@ -33,8 +33,9 @@ class InvestGrid(InvestGridBase):
         self.SeparatorTitles[crawlData.InvestData.INVEST.TYPE_STOCK] = "股票列表"
         self.SeparatorTitles[crawlData.InvestData.INVEST.TYPE_YUEGANGAO_INDEX] = "粤港澳大湾区指数"
         self.SeparatorTitles[crawlData.InvestData.INVEST.TYPE_FUND] = "基金列表"
-        self.SeparatorTitles[crawlData.InvestData.INVEST.TYPE_INDEX] = "国内指数列表"
+        self.SeparatorTitles[crawlData.InvestData.INVEST.TYPE_MAINLAND_INDEX] = "大陆指数列表"
         self.SeparatorTitles[crawlData.InvestData.INVEST.TYPE_FOREIGN_INDEX] = "国外指数列表"
+        self.SeparatorTitles[crawlData.InvestData.INVEST.TYPE_HONGKONG_INDEX] = "香港指数列表"
 
     def __init__(self, parent):
         InvestGridBase.__init__(self, parent)

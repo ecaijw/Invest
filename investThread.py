@@ -10,19 +10,22 @@ class InvestThread(InvestThreadBase):
 class InvestThreadWorker():
     def __init__(self):
         self.originData = crawlData.OriginData()
-        self.crawlStockPrice = crawlData.CrawlStockPrice()
+        self.crawlMainLandIndexPrice = crawlData.CrawlMainLandIndexPrice()
         self.crawlFundPrice = crawlData.CrawlFundPrice()
         self.crawlIndexPrice = crawlData.CrawlIndexPrice()
         self.crawlIndexForeignPrice = crawlData.CrawlIndexForeignPrice()
+        self.crawlHongKongIndexPrice = crawlData.CrawlHongKongIndexPrice()
 
     def work(self):
         print("{} work starts".format(self.__class__.__name__))
         dataList = []
-        stockDataList = self.crawlStockPrice.crawlAll(self.originData)
+        stockDataList = self.crawlMainLandIndexPrice.crawlAll(self.originData)
         dataList += stockDataList
         stockDataList = self.crawlFundPrice.crawlAll(self.originData)
         dataList += stockDataList
         stockDataList = self.crawlIndexPrice.crawlAll(self.originData)
+        dataList += stockDataList
+        stockDataList = self.crawlHongKongIndexPrice.crawlAll(self.originData)
         dataList += stockDataList
         stockDataList = self.crawlIndexForeignPrice.crawlAll(self.originData)
         dataList += stockDataList

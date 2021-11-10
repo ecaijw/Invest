@@ -55,8 +55,9 @@ class InvestData():
     INVEST.TYPE_STOCK = 1
     INVEST.TYPE_YUEGANGAO_INDEX = 2
     INVEST.TYPE_FUND = 3
-    INVEST.TYPE_INDEX = 4
+    INVEST.TYPE_MAINLAND_INDEX = 4
     INVEST.TYPE_FOREIGN_INDEX = 5
+    INVEST.TYPE_HONGKONG_INDEX = 6
 
     def __init__(self):
 
@@ -83,6 +84,10 @@ class InvestDataFund(InvestData):
         super().__init__()
 
 class InvestForeignDataIndex(InvestData):
+    def __init__(self):
+        super().__init__()
+
+class InvestHongKongDataIndex(InvestData):
     def __init__(self):
         super().__init__()
 
@@ -199,7 +204,10 @@ class CrawlStockPrice(CrawlPriceSina):
         pass
 
     def crawlAll(self, originData):
-        return CrawlPriceSina.crawlAll(self, originData, InvestData.INVEST.TYPE_STOCK)
+        return CrawlPriceSina.crawlAll(self, originData, self.getDataType())
+
+    def getDataType(self):
+        pass
 
     def crawlOnePrice(self, str, originData):
         investData : InvestData = None
@@ -235,6 +243,17 @@ class CrawlStockPrice(CrawlPriceSina):
             investData.upDownPrice = m.group(CrawlStockPrice.HK_STOCK.UPDOWN_PRICE)
             investData.upDownPercent = CrawlStockPrice.getPercentString(m.group(CrawlStockPrice.HK_STOCK.UPDOWN_PERCENT))
         return investData
+
+    def getDataType(self):
+        pass
+
+class CrawlMainLandIndexPrice(CrawlStockPrice):
+    def getDataType(self):
+        return InvestData.INVEST.TYPE_STOCK
+
+class CrawlHongKongIndexPrice(CrawlStockPrice):
+    def getDataType(self):
+        return InvestData.INVEST.TYPE_HONGKONG_INDEX
 
 '''
 http://hq.sinajs.cn/list=f_161903,f_450009,f_519736
@@ -290,7 +309,7 @@ class CrawlIndexPrice(CrawlPriceSina):
         pass
 
     def crawlAll(self, originData):
-        return CrawlPriceSina.crawlAll(self, originData, InvestData.INVEST.TYPE_INDEX)
+        return CrawlPriceSina.crawlAll(self, originData, InvestData.INVEST.TYPE_MAINLAND_INDEX)
 
     def crawlOnePrice(self, str, originData):
         investData : InvestData = None
@@ -367,10 +386,12 @@ class OriginData():
                 originData = InvestDataIndex()
             elif dataType == InvestData.INVEST.TYPE_FUND:
                 originData = InvestDataFund()
-            elif dataType == InvestData.INVEST.TYPE_INDEX:
+            elif dataType == InvestData.INVEST.TYPE_MAINLAND_INDEX:
                 originData = InvestDataIndex()
             elif dataType == InvestData.INVEST.TYPE_FOREIGN_INDEX:
                 originData = InvestForeignDataIndex()
+            elif dataType == InvestData.INVEST.TYPE_HONGKONG_INDEX:
+                originData = InvestHongKongDataIndex()
             else:
                 assert(False)
             originData.originType = dataType
@@ -411,8 +432,8 @@ class OriginDataHelper():
         [InvestData.INVEST.TYPE_FUND, "f_161903", 1.8974],  # 万家行业优选混合(LOF)
         [InvestData.INVEST.TYPE_FUND, "f_110007", 1.4159],  # 易方达稳健收益债券A
         [InvestData.INVEST.TYPE_FUND, "f_005664", 1.6115],  # 鹏扬景欣A
-        [InvestData.INVEST.TYPE_INDEX, "sh000001", 3000],  # 上证指数
-        [InvestData.INVEST.TYPE_INDEX, "sz399001", 14000],  # 深证成指
+        [InvestData.INVEST.TYPE_MAINLAND_INDEX, "sh000001", 3000],  # 上证指数
+        [InvestData.INVEST.TYPE_MAINLAND_INDEX, "sz399001", 14000],  # 深证成指
         [InvestData.INVEST.TYPE_FOREIGN_INDEX, "int_dji", 35000],  # 道琼斯
         [InvestData.INVEST.TYPE_FOREIGN_INDEX, "int_nasdaq", 14000],  # NASDAQ
         [InvestData.INVEST.TYPE_FOREIGN_INDEX, "int_sp500", 4400],  # SP500
@@ -431,7 +452,7 @@ class OriginDataHelper():
                 originData = InvestDataIndex()
             elif data[0] == InvestData.INVEST.TYPE_FUND:
                 originData = InvestDataFund()
-            elif data[0] == InvestData.INVEST.TYPE_INDEX:
+            elif data[0] == InvestData.INVEST.TYPE_MAINLAND_INDEX:
                 originData = InvestDataIndex()
             elif data[0] == InvestData.INVEST.TYPE_FOREIGN_INDEX:
                 originData = InvestForeignDataIndex()
