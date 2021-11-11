@@ -10,25 +10,19 @@ class InvestThread(InvestThreadBase):
 class InvestThreadWorker():
     def __init__(self):
         self.originData = crawlData.OriginData()
-        self.crawlMainLandIndexPrice = crawlData.CrawlMainLandIndexPrice()
-        self.crawlFundPrice = crawlData.CrawlFundPrice()
-        self.crawlIndexPrice = crawlData.CrawlIndexPrice()
-        self.crawlIndexForeignPrice = crawlData.CrawlIndexForeignPrice()
-        self.crawlHongKongIndexPrice = crawlData.CrawlHongKongIndexPrice()
+        self.crawlerList = []
+        self.crawlerList.append(crawlData.CrawlMainLandIndexPrice())
+        self.crawlerList.append(crawlData.CrawlFundPrice())
+        self.crawlerList.append(crawlData.CrawlIndexPrice())
+        self.crawlerList.append(crawlData.CrawlIndexForeignPrice())
+        self.crawlerList.append(crawlData.CrawlHongKongIndexPrice())
 
     def work(self):
         print("{} work starts".format(self.__class__.__name__))
         dataList = []
-        stockDataList = self.crawlMainLandIndexPrice.crawlAll(self.originData)
-        dataList += stockDataList
-        stockDataList = self.crawlFundPrice.crawlAll(self.originData)
-        dataList += stockDataList
-        stockDataList = self.crawlIndexPrice.crawlAll(self.originData)
-        dataList += stockDataList
-        stockDataList = self.crawlHongKongIndexPrice.crawlAll(self.originData)
-        dataList += stockDataList
-        stockDataList = self.crawlIndexForeignPrice.crawlAll(self.originData)
-        dataList += stockDataList
+        for crawler in self.crawlerList:
+            stockDataList = crawler.crawlAll(self.originData)
+            dataList += stockDataList
 
         indexData = crawlData.crawlYueGangAoIndex(self.originData.findItemByType(InvestData.INVEST.TYPE_YUEGANGAO_INDEX))
         dataList.append(indexData)
