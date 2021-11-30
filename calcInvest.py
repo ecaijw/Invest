@@ -20,6 +20,7 @@ class COLUMNS(IntEnum):
     ExchangeRate = 8
     Comment = 9
     CurrentPrice = 10
+    Note = 11
 
 
 class CalcInvestData():
@@ -36,9 +37,11 @@ class CalcInvestData():
         self.remainingTotalCost = 0
         self.remainingCost = 0
         self.remainingTotalPrice = 0
+        self.remainingTotalPriceRMB = 0
         self.remainingPrice = 0
         self.totalProfit = 0 # RMB
         self.currentPrice = 0
+        self.note = ""
 
 class Product:
     def __init__(self, oneRow):
@@ -46,13 +49,7 @@ class Product:
         self.rows = []
         self.rows.append(oneRow)
         self.productName = oneRow[COLUMNS.ProductName]
-        self.remainingAmount = 0
-        self.remainingTotalCost = 0
-        self.remainingCost = 0
-        self.remainingTotalPrice = 0
-        self.remainingPrice = 0
-        self.totalProfit = 0 # RMB
-        self.currentPrice = 0
+
 
     def getName(self):
         return self.productName
@@ -89,41 +86,25 @@ class Product:
                 data.remainingAmount += row[COLUMNS.Amount]
                 totalBuyAmount += row[COLUMNS.Amount]
                 totalBuyMoney += row[COLUMNS.TotalPrice]
+            data.note = row[COLUMNS.Note]
+            if (data.note == None):
+                data.note = ""
         totalBuyMoney *= -1
 
-        averageBuyPrice = totalBuyMoney / totalBuyAmount
+        if (totalBuyAmount == 0):
+            averageBuyPrice = 0
+        else:
+            averageBuyPrice = totalBuyMoney / totalBuyAmount
         if (totalSellAmount > 0):
             averageSellPrice = totalSellMoney / totalSellAmount
             data.totalProfit = totalSellAmount * (averageSellPrice - averageBuyPrice)
         data.remainingPrice = data.currentPrice
-        data.remainingTotalPrice = data.remainingAmount * data.remainingPrice
+        data.remainingTotalPrice = data.remainingAmount * data.remainingPrice / 10000
         data.remainingCost = averageBuyPrice
         data.remainingTotalCost = data.remainingAmount * data.remainingCost
-        # print("剩余:\n"
-        #       "  数量：{0:,}；\n "
-        #       "  价值[{1:,}, {2:,.2f}] 成本[{3:,.2f}, {4:,.2f}]; \n"
-        #       "利润: \n"
-        #       "  剩余利润：{5:,.2f}; \n"
-        #       "  已卖出利润：{6:,.2f}; \n"
-        #       "  预计总利润：{7:,.2f}; \n"
-        #       "平均买入价：{8:,.2f}；平均卖出价：{9:,.2f}".format(
-        #     self.remainingAmount,
-        #     self.remainingPrice,
-        #     self.remainingTotalPrice,
-        #     self.remainingCost,
-        #     self.remainingTotalCost,
-        #
-        #     self.remainingTotalPrice - self.remainingTotalCost,
-        #     self.totalProfit,
-        #     (self.remainingTotalPrice - self.remainingTotalCost) + self.totalProfit,
-        #
-        #     averageBuyPrice,
-        #     averageSellPrice
-        # ))
-        if (data.remainingAmount > 0):
-            print("{0:,.2f}".format((data.remainingTotalPrice - data.remainingTotalCost) * exchangeRate))
-            # print("{0}".format(self.productName))
-            # print("{0}: 剩余利润：{1:,.2f}, 剩余股数：{2:,.2f}".format(self.productName, self.remainingTotalPrice - self.remainingTotalCost, self.remainingAmount))
+
+        # unit is 万
+        data.remainingTotalPriceRMB = data.remainingTotalPrice * exchangeRate
 
         return data
 
@@ -146,8 +127,6 @@ class ProductMgr:
         for p in self.productList:
             data = p.calc()
             dataList. append(data)
-            # if p.getName() == "新纽":
-            #     data = p.calc()
         return dataList
 
     def findProduct(self, name) -> Product:

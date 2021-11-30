@@ -8,7 +8,7 @@ from investGridBase import InvestGridBase
 class InvestGrid(InvestGridBase):
     UPDOWN_FIELD_WIDTH = 2
     ROW_SIZE = 30
-    ROW_MAX_NUMBER = 30
+    ROW_MAX_NUMBER = 40
     SEPARATOR_TITLES_DEPRECATED = "过时的投资"
 
     def initConst(self):

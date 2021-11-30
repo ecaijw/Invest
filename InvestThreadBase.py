@@ -22,8 +22,7 @@ class InvestThreadBase():
             event.wait()
 
             dataList = thread.work()
-            if (len(dataList) > 0):
-                investDataQueue.put(dataList)
+            investDataQueue.put(dataList)
 
             event.clear() # clear the event
 

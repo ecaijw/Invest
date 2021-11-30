@@ -8,7 +8,7 @@ from investGridBase import InvestGridBase
 
 class CalcInvestGrid(InvestGridBase):
     ROW_SIZE = 30
-    ROW_MAX_NUMBER = 30
+    ROW_MAX_NUMBER = 40
 
     def initConst(self):
         self.COLUMN = tools._constBase()
@@ -16,9 +16,11 @@ class CalcInvestGrid(InvestGridBase):
         self.COLUMN.REMAINING_AMOUNT = 1
         self.COLUMN.REMAINING_TOTAL_COST = 2
         self.COLUMN.REMAINING_TOTAL_PRICE = 3
-        self.COLUMN.REMAINING_PRICE = 4
-        self.COLUMN.TOTAL_PROFIT = 5
-        self.COLUMN.CURRENT_PRICE = 6
+        self.COLUMN.REMAINING_TOTAL_PRICE_RMB = 4
+        self.COLUMN.REMAINING_PRICE = 5
+        self.COLUMN.TOTAL_PROFIT = 6
+        self.COLUMN.CURRENT_PRICE = 7
+        self.COLUMN.NOTE = 8
 
 
         self.Columns = dict()
@@ -26,9 +28,11 @@ class CalcInvestGrid(InvestGridBase):
         self.Columns[self.COLUMN.REMAINING_AMOUNT] = "剩余数量"
         self.Columns[self.COLUMN.REMAINING_TOTAL_COST] = "剩余总成本"
         self.Columns[self.COLUMN.REMAINING_TOTAL_PRICE] = "剩余总价值"
+        self.Columns[self.COLUMN.REMAINING_TOTAL_PRICE_RMB] = "剩余总价值(RMB)(万)"
         self.Columns[self.COLUMN.REMAINING_PRICE] = "剩余净价值"
         self.Columns[self.COLUMN.TOTAL_PROFIT] = "总利润"
         self.Columns[self.COLUMN.CURRENT_PRICE] = "当前价格"
+        self.Columns[self.COLUMN.NOTE] = "说明"
 
     def __init__(self, parent):
         InvestGridBase.__init__(self, parent)
@@ -44,6 +48,7 @@ class CalcInvestGrid(InvestGridBase):
     def updateInvestData(self, dataList):
         self.ClearGrid()
 
+        remainingTotalPriceRMB = 0
         row = 0
         data : CalcInvestData = None
         for data in dataList:
@@ -51,12 +56,20 @@ class CalcInvestGrid(InvestGridBase):
             self.SetCellNumberAndColor(row, self.COLUMN.REMAINING_AMOUNT, data.remainingAmount)
             self.SetCellNumberAndColor(row, self.COLUMN.REMAINING_TOTAL_COST, data.remainingTotalCost)
             self.SetCellNumberAndColor(row, self.COLUMN.REMAINING_TOTAL_PRICE, data.remainingTotalPrice)
+            self.SetCellNumberAndColor(row, self.COLUMN.REMAINING_TOTAL_PRICE_RMB, data.remainingTotalPriceRMB)
             self.SetCellNumberAndColor(row, self.COLUMN.REMAINING_PRICE, data.remainingPrice)
             self.SetCellNumberAndColor(row, self.COLUMN.TOTAL_PROFIT, data.totalProfit)
             self.SetCellNumberAndColor(row, self.COLUMN.CURRENT_PRICE, data.currentPrice)
+            self.SetCellValue(row, self.COLUMN.NOTE, data.note)
 
             self.setGridFormat.setFormat(row)
 
+            remainingTotalPriceRMB += data.remainingTotalPriceRMB
             row += 1
+
+        # insert: TOTAL
+        self.SetCellValue(row, 0, "合计")
+        self.SetCellNumberAndColor(row, self.COLUMN.REMAINING_TOTAL_PRICE_RMB, remainingTotalPriceRMB)
+        self.setGridFormat.setFormat(row)
 
         self.setGridFormat.finishUpdate()
