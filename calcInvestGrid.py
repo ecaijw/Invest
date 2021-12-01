@@ -45,31 +45,44 @@ class CalcInvestGrid(InvestGridBase):
         for col in range(len(self.Columns)):
             self.SetColLabelValue(col, self.Columns[col])
 
+    def updateSomeData(self, dataList, startRow, remaingAmountIs0):
+        remainingTotalPriceRMB = 0
+
+        data : CalcInvestData = None
+        for data in dataList:
+            if (remaingAmountIs0 is False and int(data.remainingAmount) == 0):
+                continue
+            if (remaingAmountIs0 and int(data.remainingAmount) != 0):
+                continue
+
+            self.SetCellValue(startRow, 0, data.productName)
+            self.SetCellNumberAndColor(startRow, self.COLUMN.REMAINING_AMOUNT, data.remainingAmount)
+            self.SetCellNumberAndColor(startRow, self.COLUMN.REMAINING_TOTAL_COST, data.remainingTotalCost)
+            self.SetCellNumberAndColor(startRow, self.COLUMN.REMAINING_TOTAL_PRICE, data.remainingTotalPrice)
+            self.SetCellNumberAndColor(startRow, self.COLUMN.REMAINING_TOTAL_PRICE_RMB, data.remainingTotalPriceRMB)
+            self.SetCellNumberAndColor(startRow, self.COLUMN.REMAINING_PRICE, data.remainingPrice)
+            self.SetCellNumberAndColor(startRow, self.COLUMN.TOTAL_PROFIT, data.totalProfit)
+            self.SetCellNumberAndColor(startRow, self.COLUMN.CURRENT_PRICE, data.currentPrice)
+            self.SetCellValue(startRow, self.COLUMN.NOTE, data.note)
+
+            self.setGridFormat.setFormat(startRow)
+
+            remainingTotalPriceRMB += data.remainingTotalPriceRMB
+            startRow += 1
+        return remainingTotalPriceRMB, startRow;
+
     def updateInvestData(self, dataList):
         self.ClearGrid()
 
-        remainingTotalPriceRMB = 0
-        row = 0
-        data : CalcInvestData = None
-        for data in dataList:
-            self.SetCellValue(row, 0, data.productName)
-            self.SetCellNumberAndColor(row, self.COLUMN.REMAINING_AMOUNT, data.remainingAmount)
-            self.SetCellNumberAndColor(row, self.COLUMN.REMAINING_TOTAL_COST, data.remainingTotalCost)
-            self.SetCellNumberAndColor(row, self.COLUMN.REMAINING_TOTAL_PRICE, data.remainingTotalPrice)
-            self.SetCellNumberAndColor(row, self.COLUMN.REMAINING_TOTAL_PRICE_RMB, data.remainingTotalPriceRMB)
-            self.SetCellNumberAndColor(row, self.COLUMN.REMAINING_PRICE, data.remainingPrice)
-            self.SetCellNumberAndColor(row, self.COLUMN.TOTAL_PROFIT, data.totalProfit)
-            self.SetCellNumberAndColor(row, self.COLUMN.CURRENT_PRICE, data.currentPrice)
-            self.SetCellValue(row, self.COLUMN.NOTE, data.note)
-
-            self.setGridFormat.setFormat(row)
-
-            remainingTotalPriceRMB += data.remainingTotalPriceRMB
-            row += 1
+        (remainingTotalPriceRMB, startRow) = self.updateSomeData(dataList, 0, False)
 
         # insert: TOTAL
-        self.SetCellValue(row, 0, "合计")
-        self.SetCellNumberAndColor(row, self.COLUMN.REMAINING_TOTAL_PRICE_RMB, remainingTotalPriceRMB)
-        self.setGridFormat.setFormat(row)
+        self.SetCellValue(startRow, 0, "合计")
+        self.SetCellNumberAndColor(startRow, self.COLUMN.REMAINING_TOTAL_PRICE_RMB, remainingTotalPriceRMB)
+        self.setGridFormat.setFormat(startRow)
+        self.SetCellBackgroundColour(startRow, self.COLUMN.REMAINING_TOTAL_PRICE_RMB, self.COLOR_LIGHT_YELLOW)
+        startRow += 1
+
+        self.updateSomeData(dataList, startRow, True)
 
         self.setGridFormat.finishUpdate()
