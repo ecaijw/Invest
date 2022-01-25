@@ -1,5 +1,6 @@
 import datetime
 import copy
+import urllib.request
 from urllib.request import *
 from bs4 import BeautifulSoup
 import re
@@ -112,7 +113,11 @@ class CrawlPriceSina():
 
         try:
             print("start: " + url)
-            response = urlopen(url, timeout = 30)
+            req_one = urllib.request.Request(url)
+            req_one.add_header('User-Agent', 'Mozilla/6.0')
+            req_one.add_header('Referer', 'http://vip.stock.finance.sina.com.cn/')
+            response = urlopen(req_one, timeout = 10)
+
             print("done: urlopen")
             responseStr = str(response.read(), encoding="gb2312")
             print(responseStr)

@@ -3,7 +3,7 @@ from enum import IntEnum
 from tools import *
 
 class CalcInvestConst:
-    FILE_NAME = r"D:\other_cjwlaptop\install\python\data\invest\test.xlsx"
+    FILE_NAME = r"D:\other_cjwlaptop\install\python\data\invest\investTest.xlsx"
     SHEET_NAME = "投资历史"
 
 
@@ -34,11 +34,11 @@ class CalcInvestData():
         #       "平均买入价：{8:,.2f}；平均卖出价：{9:,.2f}".format(
         self.productName = ""
         self.remainingAmount = 0
+        self.moneyType = ""
         self.remainingTotalCost = 0
         self.remainingCost = 0
         self.remainingTotalPrice = 0
         self.remainingTotalPriceRMB = 0
-        self.remainingPrice = 0
         self.totalProfit = 0 # RMB
         self.currentPrice = 0
         self.note = ""
@@ -73,6 +73,7 @@ class Product:
         totalSellAmount = 0
         totalSellMoney = 0
         averageSellPrice = 0
+        data.moneyType = self.rows[0][COLUMNS.MoneyType]
         exchangeRate = self.rows[0][COLUMNS.ExchangeRate]
         for row in self.rows:
             # print(row)
@@ -97,11 +98,10 @@ class Product:
             averageBuyPrice = totalBuyMoney / totalBuyAmount
         if (totalSellAmount > 0):
             averageSellPrice = totalSellMoney / totalSellAmount
-            data.totalProfit = totalSellAmount * (averageSellPrice - averageBuyPrice)
-        data.remainingPrice = data.currentPrice
-        data.remainingTotalPrice = data.remainingAmount * data.remainingPrice / 10000
+        data.remainingTotalPrice = data.remainingAmount * data.currentPrice
         data.remainingCost = averageBuyPrice
         data.remainingTotalCost = data.remainingAmount * data.remainingCost
+        data.totalProfit = data.remainingTotalPrice - data.remainingTotalCost
 
         # unit is 万
         data.remainingTotalPriceRMB = data.remainingTotalPrice * exchangeRate
@@ -114,6 +114,8 @@ class ProductMgr:
         self.productList = []
 
     def addOneRow(self, oneRow):
+        # if (oneRow[COLUMNS.ProductName] != "哔哩哔哩"):
+        #     return
         product = self.findProduct(oneRow[COLUMNS.ProductName])
         if product == None:
             product = Product(oneRow)
