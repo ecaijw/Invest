@@ -8,7 +8,7 @@ from investGridBase import InvestGridBase
 
 class CalcInvestGrid(InvestGridBase):
     ROW_SIZE = 30
-    ROW_MAX_NUMBER = 40
+    ROW_MAX_NUMBER = 50
 
     def initConst(self):
         self.COLUMN = tools._constBase()
@@ -67,7 +67,7 @@ class CalcInvestGrid(InvestGridBase):
             self.SetCellNumberAndColor(startRow, self.COLUMN.REMAINING_TOTAL_PRICE_RMB, int(data.remainingTotalPriceRMB) / 10000)
             self.SetCellNumberAndColor(startRow, self.COLUMN.TOTAL_PROFIT, int(data.totalProfit) / 10000)
             self.SetCellNumberAndColor(startRow, self.COLUMN.CURRENT_PRICE, data.currentPrice)
-            self.SetCellValue(startRow, self.COLUMN.NOTE, data.note)
+            self.SetCellValue(startRow, self.COLUMN.NOTE, data.comment)
 
             self.setGridFormat.setFormat(startRow)
 

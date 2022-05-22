@@ -20,7 +20,6 @@ class COLUMNS(IntEnum):
     ExchangeRate = 8
     Comment = 9
     CurrentPrice = 10
-    Note = 11
 
 
 class CalcInvestData():
@@ -41,7 +40,7 @@ class CalcInvestData():
         self.remainingTotalPriceRMB = 0
         self.totalProfit = 0 # RMB
         self.currentPrice = 0
-        self.note = ""
+        self.comment = ""
 
 class Product:
     def __init__(self, oneRow):
@@ -87,9 +86,9 @@ class Product:
                 data.remainingAmount += row[COLUMNS.Amount]
                 totalBuyAmount += row[COLUMNS.Amount]
                 totalBuyMoney += row[COLUMNS.TotalPrice]
-            data.note = row[COLUMNS.Note]
-            if (data.note == None):
-                data.note = ""
+            data.comment = row[COLUMNS.Comment]
+            if (data.comment == None):
+                data.comment = ""
         totalBuyMoney *= -1
 
         if (totalBuyAmount == 0):

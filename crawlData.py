@@ -116,7 +116,7 @@ class CrawlPriceSina():
             req_one = urllib.request.Request(url)
             req_one.add_header('User-Agent', 'Mozilla/6.0')
             req_one.add_header('Referer', 'http://vip.stock.finance.sina.com.cn/')
-            response = urlopen(req_one, timeout = 10)
+            response = urlopen(req_one, timeout = 30)
 
             print("done: urlopen")
             responseStr = str(response.read(), encoding="gb2312")
