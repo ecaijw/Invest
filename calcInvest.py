@@ -24,21 +24,16 @@ class COLUMNS(IntEnum):
 
 class CalcInvestData():
     def __init__(self):
-        # print("剩余        #       "  数量：{0:,}；\n "
-        #       "  价值[{1:,}, {2:,.2f}] 成本[{3:,.2f}, {4:,.2f}]; \n"
-        #       "利润: \n"
-        #       "  剩余利润：{5:,.2f}; \n"
-        #       "  已卖出利润：{6:,.2f}; \n"
-        #       "  预计总利润：{7:,.2f}; \n"
-        #       "平均买入价：{8:,.2f}；平均卖出价：{9:,.2f}".format(
         self.productName = ""
         self.remainingAmount = 0
         self.moneyType = ""
-        self.remainingTotalCost = 0
+        self.totalCost = 0
         self.remainingCost = 0
-        self.remainingTotalPrice = 0
         self.remainingTotalPriceRMB = 0
-        self.totalProfit = 0 # RMB
+        self.remainingTotalPrice = 0
+        self.totalSellMoney = 0
+        self.totalProfit = 0
+        self.totalProfitRMB = 0 # RMB
         self.currentPrice = 0
         self.comment = ""
 
@@ -56,6 +51,10 @@ class Product:
     def addOneRow(self, oneRow):
         self.rows.append(oneRow)
 
+    def printRows(self):
+        for row in self.rows:
+            print(row)
+
     '''    
         计算剩余股票成本价的公式为：
         1) 最后卖股票得到的钱
@@ -70,7 +69,6 @@ class Product:
         totalBuyAmount = 0
         totalBuyMoney = 0
         totalSellAmount = 0
-        totalSellMoney = 0
         averageSellPrice = 0
         data.moneyType = self.rows[0][COLUMNS.MoneyType]
         exchangeRate = self.rows[0][COLUMNS.ExchangeRate]
@@ -81,7 +79,7 @@ class Product:
             if (price > 0): # sell
                 data.remainingAmount -= row[COLUMNS.Amount]
                 totalSellAmount += row[COLUMNS.Amount]
-                totalSellMoney += row[COLUMNS.TotalPrice]
+                data.totalSellMoney += row[COLUMNS.TotalPrice]
             else: # buy
                 data.remainingAmount += row[COLUMNS.Amount]
                 totalBuyAmount += row[COLUMNS.Amount]
@@ -96,15 +94,18 @@ class Product:
         else:
             averageBuyPrice = totalBuyMoney / totalBuyAmount
         if (totalSellAmount > 0):
-            averageSellPrice = totalSellMoney / totalSellAmount
+            averageSellPrice = data.totalSellMoney / totalSellAmount
         data.remainingTotalPrice = data.remainingAmount * data.currentPrice
-        data.remainingCost = averageBuyPrice
-        data.remainingTotalCost = data.remainingAmount * data.remainingCost
-        data.totalProfit = data.remainingTotalPrice - data.remainingTotalCost
+        if (data.remainingAmount > 0):
+            data.remainingCost = (totalBuyMoney - data.totalSellMoney) / data.remainingAmount
+        data.totalCost = totalBuyMoney
+        data.totalProfit = data.remainingTotalPrice + data.totalSellMoney- data.totalCost
 
         # unit is 万
         data.remainingTotalPriceRMB = data.remainingTotalPrice * exchangeRate
+        data.totalProfitRMB = data.totalProfit * exchangeRate
 
+        # print("{0}: 平均买入成本: {1}; 平均卖出价格: {2}".format(self.getName(), averageBuyPrice, averageSellPrice))
         return data
 
 class ProductMgr:
@@ -126,6 +127,9 @@ class ProductMgr:
         dataList = []
         p : Product
         for p in self.productList:
+            # if (p.getName() != "哔哩哔哩"):
+            #     continue
+            # p.printRows()
             data = p.calc()
             dataList. append(data)
         return dataList
@@ -165,13 +169,14 @@ class excel:
 
 class CalcInvestThreadWorker():
     def __init__(self):
-        self.productMgr = ProductMgr()
+        pass
 
     def work(self):
         print("{} work starts".format(self.__class__.__name__))
 
-        excel().readExcel(self.productMgr)
-        dataList = self.productMgr.calc()
+        productMgr = ProductMgr()
+        excel().readExcel(productMgr)
+        dataList = productMgr.calc()
 
         print("{} work ends".format(self.__class__.__name__))
         return dataList

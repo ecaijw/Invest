@@ -18,10 +18,12 @@ class CalcInvestGrid(InvestGridBase):
         self.COLUMN.CURRENT_PRICE = 3
         self.COLUMN.MONEY_TYPE = 4
         self.COLUMN.REMAINING_TOTAL_PRICE_RMB = 5
-        self.COLUMN.REMAINING_TOTAL_COST = 6
-        self.COLUMN.REMAINING_TOTAL_PRICE = 7
-        self.COLUMN.TOTAL_PROFIT = 8
-        self.COLUMN.NOTE = 9
+        self.COLUMN.REMAINING_TOTAL_PRICE = 6
+        self.COLUMN.TOTAL_SELL_MONEY = 7
+        self.COLUMN.TOTAL_COST = 8
+        self.COLUMN.TOTAL_PROFIT = 9
+        self.COLUMN.TOTAL_PROFIT_RMB = 10
+        self.COLUMN.NOTE = 11
 
 
         self.Columns = dict()
@@ -31,9 +33,11 @@ class CalcInvestGrid(InvestGridBase):
         self.Columns[self.COLUMN.CURRENT_PRICE] = "当前价格"
         self.Columns[self.COLUMN.MONEY_TYPE] = "单位"
         self.Columns[self.COLUMN.REMAINING_TOTAL_PRICE_RMB] = "剩余总价值(RMB)(万)"
-        self.Columns[self.COLUMN.REMAINING_TOTAL_COST] = "剩余总成本"
         self.Columns[self.COLUMN.REMAINING_TOTAL_PRICE] = "剩余总价值"
+        self.Columns[self.COLUMN.TOTAL_SELL_MONEY] = "卖出收入"
+        self.Columns[self.COLUMN.TOTAL_COST] = "总成本"
         self.Columns[self.COLUMN.TOTAL_PROFIT] = "总利润"
+        self.Columns[self.COLUMN.TOTAL_PROFIT_RMB] = "总利润(RMB)"
         self.Columns[self.COLUMN.NOTE] = "说明"
 
     def __init__(self, parent):
@@ -58,14 +62,16 @@ class CalcInvestGrid(InvestGridBase):
                 continue
 
             self.SetCellValue(startRow, 0, data.productName)
-            self.SetCellNumberAndColor(startRow, self.COLUMN.REMAINING_AMOUNT, data.remainingAmount)
+            self.SetCellNumberAndColor(startRow, self.COLUMN.REMAINING_AMOUNT, data.remainingAmount / 10000)
             self.SetCellNumberAndColor(startRow, self.COLUMN.REMAINING_ORIGINAL_PRICE, data.remainingCost)
             self.SetCellValue(startRow, self.COLUMN.MONEY_TYPE, data.moneyType)
-            self.SetCellNumberAndColor(startRow, self.COLUMN.REMAINING_TOTAL_PRICE_RMB, int(data.remainingTotalCost) / 10000)
-            self.SetCellNumberAndColor(startRow, self.COLUMN.REMAINING_TOTAL_COST, int(data.remainingTotalCost) / 10000)
+            self.SetCellNumberAndColor(startRow, self.COLUMN.REMAINING_TOTAL_PRICE_RMB, int(data.totalCost) / 10000)
             self.SetCellNumberAndColor(startRow, self.COLUMN.REMAINING_TOTAL_PRICE, int(data.remainingTotalPrice) / 10000)
             self.SetCellNumberAndColor(startRow, self.COLUMN.REMAINING_TOTAL_PRICE_RMB, int(data.remainingTotalPriceRMB) / 10000)
+            self.SetCellNumberAndColor(startRow, self.COLUMN.TOTAL_SELL_MONEY, int(data.totalSellMoney) / 10000)
+            self.SetCellNumberAndColor(startRow, self.COLUMN.TOTAL_COST, int(data.totalCost) / 10000)
             self.SetCellNumberAndColor(startRow, self.COLUMN.TOTAL_PROFIT, int(data.totalProfit) / 10000)
+            self.SetCellNumberAndColor(startRow, self.COLUMN.TOTAL_PROFIT_RMB, int(data.totalProfitRMB) / 10000)
             self.SetCellNumberAndColor(startRow, self.COLUMN.CURRENT_PRICE, data.currentPrice)
             self.SetCellValue(startRow, self.COLUMN.NOTE, data.comment)
 
