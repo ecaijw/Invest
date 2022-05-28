@@ -53,6 +53,7 @@ class CalcInvestGrid(InvestGridBase):
 
     def updateSomeData(self, dataList, startRow, remaingAmountIs0):
         remainingTotalPriceRMB = 0
+        totalProfitRMB = 0
 
         data : CalcInvestData = None
         for data in dataList:
@@ -78,21 +79,34 @@ class CalcInvestGrid(InvestGridBase):
             self.setGridFormat.setFormat(startRow)
 
             remainingTotalPriceRMB += data.remainingTotalPriceRMB
+            if (data.productName != "小米0"):
+                # NOT include xiaomi stock
+                totalProfitRMB += data.totalProfitRMB
             startRow += 1
-        return remainingTotalPriceRMB, startRow;
+        return remainingTotalPriceRMB, totalProfitRMB, startRow;
 
     def updateInvestData(self, dataList):
         self.ClearGrid()
 
-        (remainingTotalPriceRMB, startRow) = self.updateSomeData(dataList, 0, False)
+        (remainingTotalPriceRMB, totalProfitRMB, startRow) = self.updateSomeData(dataList, 0, False)
 
         # insert: TOTAL
         self.SetCellValue(startRow, 0, "合计")
-        self.SetCellNumberAndColor(startRow, self.COLUMN.REMAINING_TOTAL_PRICE_RMB, remainingTotalPriceRMB / 10000)
         self.setGridFormat.setFormat(startRow)
         self.SetCellBackgroundColour(startRow, self.COLUMN.REMAINING_TOTAL_PRICE_RMB, self.COLOR_LIGHT_YELLOW)
+        self.SetCellNumberAndColor(startRow, self.COLUMN.REMAINING_TOTAL_PRICE_RMB, remainingTotalPriceRMB / 10000)
+        self.SetCellBackgroundColour(startRow, self.COLUMN.TOTAL_PROFIT_RMB, self.COLOR_LIGHT_YELLOW)
+        self.SetCellNumberAndColor(startRow, self.COLUMN.TOTAL_PROFIT_RMB, totalProfitRMB / 10000)
+        self.SetCellValue(startRow, self.COLUMN.NOTE, "贷款利润为0；总利润(RMB)不包含小米0")
+
         startRow += 1
 
-        self.updateSomeData(dataList, startRow, True)
+        (remainingTotalPriceRMB, totalProfitRMB, startRow) = self.updateSomeData(dataList, startRow, True)
+        # insert: TOTAL
+        self.SetCellValue(startRow, 0, "合计")
+        self.setGridFormat.setFormat(startRow)
+        self.SetCellBackgroundColour(startRow, self.COLUMN.TOTAL_PROFIT_RMB, self.COLOR_LIGHT_YELLOW)
+        self.SetCellNumberAndColor(startRow, self.COLUMN.TOTAL_PROFIT_RMB, totalProfitRMB / 10000)
+        self.SetCellValue(startRow, self.COLUMN.NOTE, "总利润(RMB)包含小米")
 
         self.setGridFormat.finishUpdate()

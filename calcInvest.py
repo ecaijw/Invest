@@ -55,6 +55,8 @@ class Product:
         for row in self.rows:
             print(row)
 
+    def isLoan(self):
+        return self.rows[0][COLUMNS.Type] == "抵押贷款"
     '''    
         计算剩余股票成本价的公式为：
         1) 最后卖股票得到的钱
@@ -99,7 +101,10 @@ class Product:
         if (data.remainingAmount > 0):
             data.remainingCost = (totalBuyMoney - data.totalSellMoney) / data.remainingAmount
         data.totalCost = totalBuyMoney
-        data.totalProfit = data.remainingTotalPrice + data.totalSellMoney- data.totalCost
+        if (self.isLoan()):
+            data.totalProfit = 0
+        else:
+            data.totalProfit = data.remainingTotalPrice + data.totalSellMoney - data.totalCost
 
         # unit is 万
         data.remainingTotalPriceRMB = data.remainingTotalPrice * exchangeRate
@@ -114,7 +119,7 @@ class ProductMgr:
         self.productList = []
 
     def addOneRow(self, oneRow):
-        # if (oneRow[COLUMNS.ProductName] != "哔哩哔哩"):
+        # if (oneRow[COLUMNS.ProductName] != "佳兆业"):
         #     return
         product = self.findProduct(oneRow[COLUMNS.ProductName])
         if product == None:
@@ -122,6 +127,10 @@ class ProductMgr:
             self.productList.append(product)
         else:
             product.addOneRow(oneRow)
+
+    @staticmethod
+    def sortDataListKey(data : CalcInvestData):
+        return data.remainingTotalPriceRMB
 
     def calc(self):
         dataList = []
@@ -132,6 +141,9 @@ class ProductMgr:
             # p.printRows()
             data = p.calc()
             dataList. append(data)
+
+        dataList.sort(key=self.sortDataListKey, reverse=True)
+
         return dataList
 
     def findProduct(self, name) -> Product:
