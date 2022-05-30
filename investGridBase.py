@@ -40,6 +40,9 @@ class InvestGridBase(gridlib.Grid):
                 fieldWidth = self.FLOAT_FIELD_WIDTH
             textNumber = "{0:.{1}f}".format(floatNumber, fieldWidth)
 
+        if (floatNumber == 0.0):
+            return
+
         self.SetCellValue(row, col, textNumber)
         self.SetCellTextColour(row, col, self.GetColorByUpDown(floatNumber))
 
